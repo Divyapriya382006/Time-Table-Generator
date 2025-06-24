@@ -317,6 +317,59 @@ function generateSlotChoices(index) {
   }
 }
 
+// Function to handle CVLA trio population (C1 -> TC1, TCC1)
+function populateCVLATrio(subjectIndex, choiceIndex, selectedPrimarySlot) {
+    const secondSlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_1`);
+    const thirdSlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_2`);
+
+    // Clear previous options
+    secondSlotDropdown.innerHTML = '';
+    thirdSlotDropdown.innerHTML = '';
+
+    secondSlotDropdown.disabled = true;
+    thirdSlotDropdown.disabled = true;
+
+    if (selectedPrimarySlot && cvlaSlotTrios[selectedPrimarySlot]) {
+        const [secondary, tertiary] = cvlaSlotTrios[selectedPrimarySlot];
+
+        // Add the automatically filled secondary option
+        const secondaryOption = document.createElement('option');
+        secondaryOption.value = secondary;
+        secondaryOption.textContent = secondary;
+        secondaryOption.selected = true; // Mark as selected
+        secondSlotDropdown.appendChild(secondaryOption);
+        secondSlotDropdown.disabled = false; // Enable
+
+        // Add the automatically filled tertiary option
+        const tertiaryOption = document.createElement('option');
+        tertiaryOption.value = tertiary;
+        tertiaryOption.textContent = tertiary;
+        tertiaryOption.selected = true; // Mark as selected
+        thirdSlotDropdown.appendChild(tertiaryOption);
+        thirdSlotDropdown.disabled = false; // Enable
+    }
+}
+
+// Function for populating paired slots (e.g., A1 -> TA1)
+function populatePairedSlot(subjectIndex, choiceIndex, selectedPrimarySlot, subjectName) {
+    const secondarySlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_secondary`);
+    const { pairings } = subjectPairedSlotInfo[subjectName];
+
+    // Clear previous options
+    secondarySlotDropdown.innerHTML = '';
+    secondarySlotDropdown.disabled = true;
+
+    if (selectedPrimarySlot && pairings[selectedPrimarySlot]) {
+        const secondary = pairings[selectedPrimarySlot];
+        const secondaryOption = document.createElement('option');
+        secondaryOption.value = secondary;
+        secondaryOption.textContent = secondary;
+        secondaryOption.selected = true; // Mark as selected
+        secondarySlotDropdown.appendChild(secondaryOption);
+        secondarySlotDropdown.disabled = false; // Enable
+    }
+}
+
 // This function is now mostly redundant as faculty dropdowns are generated within generateSlotChoices
 // Keeping it for potential future general updates if needed, but it will no longer populate faculty.
 function updateFaculties(index) {
