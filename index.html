@@ -1,4 +1,5 @@
 <!--this is not my code,this is from chatgpt-->
+<!DOCTYPE html>
 <html>
 <head>
   <title>Time Table Generator</title>
@@ -21,6 +22,19 @@
       font-weight: bold;
       margin-right: 5px;
     }
+    /* Removed .lab-slots-container as labs are now inline with slot-choice-line */
+    /* .lab-slots-container {
+        border: 1px dashed #c0c0c0;
+        padding: 8px;
+        margin-top: 10px;
+        background-color: #f0f8ff;
+        border-radius: 4px;
+        display: none;
+    }
+    .lab-slots-container select {
+        margin-bottom: 5px;
+    } */
+
     /* Adjusted for faculty-slot-lab inline layout */
     .subject-input-group {
         display: flex;
@@ -99,38 +113,14 @@ const cvlaSlotTrios = {
     "A1": ["TA1", "TAA1"],
     "A2": ["TA2", "TAA2"]
 };
-
-// Map CVLA faculty to the primary slots they teach
-const cvlaFacultySlotMapping = {
-    "ABHISHEK KUMAR SING": ["C1", "A2"],
-    "NATHIYA N": ["C1", "A2"],
-    "SAROJ KUMAR DASH": ["C1", "C2"],
-    "SANDIP KUMAR DAS": ["C1"],
-    "SETHUKUMARASAMY": ["C1", "C2"],
-    "MANIMARAN J": ["C1", "C2"],
-    "OM NAMHA SHIVAY": ["C1", "A2"],
-    "SUDIP DEBNATH": ["C1", "C2"],
-    "ASHIS BERA": ["C2"],
-    "SRUTHA KEERTHI B": ["A1"],
-    "MANIVANNAN A": ["A1"],
-    "VIJAY KUMAR P": ["A1", "A2"],
-    "DHIVYA M": ["A1", "A2"],
-    "RAJESH KUMAR MOHAPATR": ["A1"],
-    "SOWNDARRAJAN P T": ["A1", "A2"],
-    "PADMAJA N": ["A1"],
-    "DURGAPRASAD P": ["A2"],
-    "HARSHAVARTHINI": ["A2"],
-    "BALAJI": ["A1", "A2"],
-    "JAYAGOPAL R": ["A1", "A2"],
-    "MOHIT KUMAR": ["A2"],
-    "DURGA": ["A2"]
-};
+// Initial choices for the first dropdown for CVLA trios
+const cvlaInitialSlots = Object.keys(cvlaSlotTrios);
 
 
 // Define paired slots for DSA, CAO, OS, MPMC core slots
 const subjectPairedSlotInfo = {
     DSA: {
-        primaryOptions: ["C1", "C2", "TCC1", "TCC2"], // These are the theoretical full options
+        primaryOptions: ["C1", "C2", "TCC1", "TCC2"],
         pairings: { "C1": "TC1", "C2": "TC2" }
     },
     CAO: {
@@ -158,74 +148,17 @@ for (let i = 1; i <= 59; i += 2) {
 
 // Define lab slot configurations for subjects that have them
 const subjectLabConfig = {
-    JAVA: { numDropdowns: 2, options: allLabPairs },
-    MPMC: { numDropdowns: 1, options: allLabPairs },
-    DSA:  { numDropdowns: 1, options: allLabPairs },
-    OS:   { numDropdowns: 1, options: allLabPairs }
-};
-
-// NEW: Detailed Faculty-CoreSlot-LabSlot Mapping
-const subjectFacultySlotLabMapping = {
-    "JAVA": {
-        "Anusooya": { "TB1": ["L29+L30", "L31+L32"] },
-        "Senthil": { "TB1": ["L39+L40", "L51+L52"], "TB2": ["L1+L2", "L19+L20"] },
-        "Rajesh": { "TB1": ["L37+L38", "L55+L56"], "TB2": ["L15+L16", "L27+L28"] },
-        "Sivakumar": { "TB1": ["L31+L32", "L49+L50"], "TB2": ["L47+L48", "L53+L54"] },
-        "Jahangeer": { "TB1": ["L31+L32", "L49+L50"], "TB2": ["L47+L48", "L53+L54"] },
-        "Jenila": { "TB1": ["L29+L30", "L43+L44"] },
-        "Rajiv": { "TB2": ["L9+L10", "L21+L22"] },
-        "Pradeep": { "TB2": ["L3+L4", "L13+L14"] },
-        "Kanniga": { "TB1": ["L31+L32", "L49+L50"], "TB2": ["L15+L16", "L27+L28"] },
-        "Sivakami": { "TB1": ["L39+L40", "L51+L52"], "TB2": ["L9+L10", "L21+L22"] },
-        "Saravana": { "TB1": ["L39+L40", "L51+L52"], "TB2": ["L1+L2", "L19+L20"] },
-        "Marimuthu": { "TB1": ["L23+L24", "L29+L30"], "TB2": ["L7+L8", "L25+L26"] },
-        "Tahir": { "TB2": ["L7+L8", "L25+L26"] }
-    },
-    "DSA": {
-        "Kartika": { "C1+TC1": ["L37+L38"], "C2+TC2": ["L5+L6"] },
-        "Abishi": { "C1+TC1": ["L51+L52"], "C2+TC2": ["L21+L22"] },
-        "Rishi": { "C1+TC1": ["L45+L46"], "C2+TC2": ["L3+L4"] },
-        "Bhuvaneshvari": { "C1+TC1": ["L33+L34"], "C2+TC2": ["L19+L20"] },
-        "Uma": { "C1+TC1": ["L33+L34", "L1+L2"] },
-        "Rolla": { "C1+TC1": ["L19+L20"] },
-        "Joe": { "C1+TC1": ["L57+L58"] },
-        "Mary": { "C1+TC1": ["L49+L50"], "C2+TC2": ["L19+L20"] },
-        "Raja Shree": { "C1+TC1": ["L51+L52"], "C2+TC2": ["L7+L8"] },
-        "Pravin": { "C1+TC1": ["L45+L46"], "C2+TC2": ["L5+L6"] },
-        "Sendhil": { "C1+TC1": ["L31+L32"], "C2+TC2": ["L3+L4"] },
-        "Senthil Kumar": { "C2+TC2": ["L27+L28"] },
-        "Rajakumar": { "C1+TC1": ["L1+L2"] }
-    },
-    "CAO": {
-        // No specific lab slots tied to theory slots in the image.
-        // Lab dropdowns will show allLabPairs if no specific map found.
-        "Padma": { "D1+TD1": [], "D2+TD2": [] },
-        "Manjula": { "D1+TD1": [] },
-        "Kaja": { "D1+TD1": [], "D2+TD2": [] },
-        "Aswiga": { "D1+TD1": [], "D2+TD2": [] },
-        "Revathi": { "D1+TD1": [], "D2+TD2": [] },
-        "Linda": { "D2+TD2": [] },
-        "Thani": { "D2+TD2": [] },
-        "Sree Prakash": { "D2+TD2": [] }
-    },
-    "OS": {
-        "Kumar": { "E1+TE1": ["L29+L30"] },
-        "Anita": { "E1+TE1": ["L45+L46"], "E2+TE2": ["L27+L28"] },
-        "Indra": { "E1+TE1": ["L45+L46"], "E2+TE2": ["L27+L28"] },
-        "Vatchala": { "E1+TE1": ["L31+L32"], "E2+TE2": ["L3+L4"] },
-        "Shyamala": { "E1+TE1": ["L39+L40"] },
-        "Rabindra": { "E2+TE2": ["L23+L24"] },
-        "Yogesh": { "E2+TE2": ["L9+L10"] },
-        "Anandan": { "E2+TE2": ["L27+L28"] },
-        "Saranya": { "E2+TE2": ["L25+L26"] }
-    }
+    JAVA: { numDropdowns: 2, options: allLabPairs },       // Java will have 2 dropdowns, showing all lab pairs
+    MPMC: { numDropdowns: 1, options: allLabPairs },                // MPMC will have 1 dropdown, showing all lab pairs
+    DSA:  { numDropdowns: 1, options: allLabPairs },                // DSA will have 1 dropdown, showing all lab pairs
+    OS:   { numDropdowns: 1, options: allLabPairs }                // OS will have 1 dropdown, showing all lab pairs
 };
 
 
 // This map is for subjects that *don't* have special pairing/trio logic OR lab slots
 // and use standard single slot dropdowns.
 const subjectSpecificSlots = {
-    JAVA: ["TB1", "TB2"], // Regular core slots for Java, as single choices - now filtered by faculty
+    JAVA: ["TB1", "TB2"], // Regular core slots for Java, as single choices
     FL: ["G1", "G2", "B1", "B2"],
     // STS will use allSlots() as no specific entry here
     // French will use allSlots() as no specific entry here
@@ -267,7 +200,7 @@ function generateInputs() {
     `;
     container.appendChild(div);
     // Initial call to generate slot choices based on default subject or previously selected one
-    generateSlotChoices(i);
+    generateSlotChoices(i); // This will also call updateFaculties implicitly
   }
 }
 
@@ -277,7 +210,7 @@ function generateSlotChoices(index) {
   slotDiv.innerHTML = '';
 
   const selectedSubject = document.getElementById(`subject${index}`).value;
-  const facultyList = facultyMap[selectedSubject] || [];
+  const facultyList = facultyMap[selectedSubject] || []; // Get faculty list once
 
   for (let j = 0; j < count; j++) {
       const slotChoiceLine = document.createElement("div");
@@ -288,24 +221,23 @@ function generateSlotChoices(index) {
       facultySelect.name = `faculty${index}_${j}`;
       facultySelect.id = `faculty${index}_${j}`;
       facultySelect.required = true;
+      // Populate faculty dropdown here
       facultySelect.innerHTML = '<option value="">--Select Faculty--</option>' + facultyList.map(f => `<option value="${f}">${f}</option>`).join('');
       slotChoiceLine.appendChild(document.createTextNode('Faculty: '));
       slotChoiceLine.appendChild(facultySelect);
 
       // --- Core Slot(s) ---
-      let primarySlotSelect; // Reference to the primary slot dropdown
-
       if (selectedSubject === "CVLA") {
           const primarySlotId = `slots${index}_${j}_0`;
           const secondarySlotId = `slots${index}_${j}_1`;
           const tertiarySlotId = `slots${index}_${j}_2`;
 
-          primarySlotSelect = document.createElement("select");
-          primarySlotSelect.name = primarySlotId;
-          primarySlotSelect.id = primarySlotId;
-          primarySlotSelect.required = true;
-          primarySlotSelect.onchange = () => populateCVLATrio(index, j, primarySlotSelect.value);
-          primarySlotSelect.innerHTML = '<option value="">--Select Primary--</option>'; // Initial empty
+          const primarySelect = document.createElement("select");
+          primarySelect.name = primarySlotId;
+          primarySelect.id = primarySlotId;
+          primarySelect.required = true;
+          primarySelect.onchange = () => populateCVLATrio(index, j, primarySelect.value);
+          primarySelect.innerHTML = '<option value="">--Select Primary--</option>' + cvlaInitialSlots.map(s => `<option value="${s}">${s}</option>`).join('');
 
           const secondarySelect = document.createElement("select");
           secondarySelect.name = secondarySlotId;
@@ -322,26 +254,21 @@ function generateSlotChoices(index) {
           tertiarySelect.innerHTML = '<option value="">--Tertiary--</option>';
 
           slotChoiceLine.appendChild(document.createTextNode(` Trio Choice ${j + 1}: `));
-          slotChoiceLine.appendChild(primarySlotSelect);
+          slotChoiceLine.appendChild(primarySelect);
           slotChoiceLine.appendChild(secondarySelect);
           slotChoiceLine.appendChild(tertiarySelect);
 
-          // CVLA specific: Faculty change filters primary slot options
-          facultySelect.onchange = () => updateCVLASlotsByFaculty(index, j, facultySelect.value);
-
       } else if (subjectPairedSlotInfo[selectedSubject]) {
+          const { primaryOptions } = subjectPairedSlotInfo[selectedSubject];
           const primarySelectId = `slots${index}_${j}_primary`;
           const secondarySelectId = `slots${index}_${j}_secondary`;
 
-          primarySlotSelect = document.createElement("select");
+          const primarySelect = document.createElement("select");
           primarySelect.name = primarySelectId;
           primarySelect.id = primarySelectId;
           primarySelect.required = true;
-          // Note: The onchange for paired slot population is handled here.
-          // The onchange for lab filtering will be added after this block if the subject has labs.
           primarySelect.onchange = () => populatePairedSlot(index, j, primarySelect.value, selectedSubject);
-          primarySelect.innerHTML = '<option value="">--Select Primary--</option>'; // Initial empty
-
+          primarySelect.innerHTML = '<option value="">--Select Primary--</option>' + primaryOptions.map(s => `<option value="${s}">${s}</option>`).join('');
 
           const secondarySelect = document.createElement("select");
           secondarySelect.name = secondarySelectId;
@@ -350,40 +277,18 @@ function generateSlotChoices(index) {
           secondarySelect.innerHTML = '<option value="">--Paired Slot--</option>';
 
           slotChoiceLine.appendChild(document.createTextNode(` Slot Choice ${j + 1}: `));
-          slotChoiceLine.appendChild(primarySlotSelect);
+          slotChoiceLine.appendChild(primarySelect);
           slotChoiceLine.appendChild(secondarySelect);
 
-          // For subjects with paired slots (DSA, CAO, OS, MPMC) and lab mappings:
-          if (subjectFacultySlotLabMapping[selectedSubject]) {
-              facultySelect.onchange = () => filterCoreSlotsAndLabsByFaculty(index, j, selectedSubject, facultySelect.value);
-              primarySlotSelect.onchange = () => { // Extend existing onchange to also filter labs
-                  populatePairedSlot(index, j, primarySelect.value, selectedSubject);
-                  const coreSlotForLabFiltering = primarySelect.value;
-                  const currentFaculty = facultySelect.value;
-                  filterLabSlotsByCoreSlot(index, j, selectedSubject, currentFaculty, coreSlotForLabFiltering);
-              };
-          }
-
-      } else { // STS, FL, French (and potentially others without specific pairing/trio logic)
-          primarySlotSelect = document.createElement("select"); // Renamed for consistent handling
-          primarySlotSelect.name = `slots${index}_${j}`;
-          primarySlotSelect.required = true;
-          primarySlotSelect.innerHTML = '<option value="">--Select Slot--</option>' + (subjectSpecificSlots[selectedSubject] || allSlots()).map(s => `<option value="${s}">${s}</option>`).join('');
+      } else {
+          const availableSlotsForSubject = subjectSpecificSlots[selectedSubject] || allSlots();
+          const slotSelect = document.createElement("select");
+          slotSelect.name = `slots${index}_${j}`;
+          slotSelect.required = true;
+          slotSelect.innerHTML = availableSlotsForSubject.map(s => `<option value="${s}">${s}</option>`).join('');
 
           slotChoiceLine.appendChild(document.createTextNode(` Slot Choice ${j + 1}: `));
-          slotChoiceLine.appendChild(primarySlotSelect);
-
-          // For generic subjects that might have labs but no specific core slot filtering from faculty
-          if (subjectLabConfig[selectedSubject] && subjectFacultySlotLabMapping[selectedSubject]) {
-              facultySelect.onchange = () => {
-                  // If no core slot filtering, labs are not filtered by core slot, only by faculty if mapped.
-                  // For now, if no core slot mapping from faculty, just make labs available from allLabPairs.
-                  filterLabSlotsByCoreSlot(index, j, selectedSubject, facultySelect.value, primarySlotSelect.value);
-              };
-              primarySlotSelect.onchange = () => {
-                filterLabSlotsByCoreSlot(index, j, selectedSubject, facultySelect.value, primarySlotSelect.value);
-              };
-          }
+          slotChoiceLine.appendChild(slotSelect);
       }
 
       // --- Lab Slot(s) (Inline with the current slot choice) ---
@@ -398,9 +303,12 @@ function generateSlotChoices(index) {
               labDropdown.name = `labSlot${index}_${j}_${k}`; // Unique name per slot choice per dropdown
               labDropdown.id = `labSlot${index}_${j}_${k}`;
               labDropdown.required = true;
-              labDropdown.disabled = true; // Initially disabled
 
-              labDropdown.innerHTML = '<option value="">--Select Lab--</option>';
+              let optionsHtml = '<option value="">--Select Lab--</option>';
+              labConfig.options.forEach(labPair => {
+                  optionsHtml += `<option value="${labPair}">${labPair}</option>`;
+              });
+              labDropdown.innerHTML = optionsHtml;
               labSelectGroup.appendChild(labDropdown);
           }
           slotChoiceLine.appendChild(labSelectGroup);
@@ -409,122 +317,11 @@ function generateSlotChoices(index) {
   }
 }
 
-// NEW: Function to filter core slots AND lab slots based on selected faculty (for Java, DSA, CAO, OS)
-function filterCoreSlotsAndLabsByFaculty(subjectIndex, choiceIndex, selectedSubject, selectedFaculty) {
-    const facultySpecificMapping = subjectFacultySlotLabMapping[selectedSubject];
-    const primarySlotSelect = document.getElementById(`slots${subjectIndex}_${choiceIndex}_primary`) || // For paired
-                              document.getElementById(`slots${subjectIndex}_${choiceIndex}_0`) ||    // For CVLA
-                              document.querySelector(`#slotChoices${subjectIndex} select[name="slots${subjectIndex}_${choiceIndex}"]`); // For generic
-    if (!primarySlotSelect) return;
-
-    primarySlotSelect.innerHTML = '<option value="">--Select Primary--</option>'; // Clear existing options
-
-    // Reset secondary/tertiary dropdowns if they exist for paired/trio subjects
-    const secondarySlotSelect = document.getElementById(`slots${subjectIndex}_${choiceIndex}_secondary`);
-    const tertiarySlotSelect = document.getElementById(`slots${subjectIndex}_${choiceIndex}_2`);
-    if (secondarySlotSelect) {
-        secondarySlotSelect.innerHTML = '<option value="">--Paired Slot--</option>';
-        secondarySlotSelect.disabled = true;
-    }
-    if (tertiarySlotSelect) {
-        tertiarySlotSelect.innerHTML = '<option value="">--Tertiary--</option>';
-        tertiarySlotSelect.disabled = true;
-    }
-
-    // Reset and disable lab dropdowns
-    const labConfig = subjectLabConfig[selectedSubject];
-    if (labConfig) {
-        for (let k = 0; k < labConfig.numDropdowns; k++) {
-            const labDropdown = document.getElementById(`labSlot${subjectIndex}_${choiceIndex}_${k}`);
-            if (labDropdown) {
-                labDropdown.innerHTML = '<option value="">--Select Lab--</option>';
-                labDropdown.disabled = true;
-            }
-        }
-    }
-
-
-    if (selectedFaculty && facultySpecificMapping && facultySpecificMapping[selectedFaculty]) {
-        const coreSlotsForFaculty = Object.keys(facultySpecificMapping[selectedFaculty]);
-        coreSlotsForFaculty.forEach(slot => {
-            primarySlotSelect.innerHTML += `<option value="${slot}">${slot}</option>`;
-        });
-        primarySlotSelect.disabled = false; // Enable primary slot dropdown
-    } else {
-        primarySlotSelect.disabled = true; // Disable if no faculty selected or no slots for faculty
-    }
-}
-
-
-// NEW: Function to filter lab slots based on selected core slot and faculty
-function filterLabSlotsByCoreSlot(subjectIndex, choiceIndex, selectedSubject, selectedFaculty, selectedCoreSlot) {
-    const labConfig = subjectLabConfig[selectedSubject];
-    if (!labConfig) return; // Subject has no lab configuration
-
-    const specificLabSlots = subjectFacultySlotLabMapping[selectedSubject]
-                             && subjectFacultySlotLabMapping[selectedSubject][selectedFaculty]
-                             && subjectFacultySlotLabMapping[selectedSubject][selectedFaculty][selectedCoreSlot];
-
-    for (let k = 0; k < labConfig.numDropdowns; k++) {
-        const labDropdown = document.getElementById(`labSlot${subjectIndex}_${choiceIndex}_${k}`);
-        if (labDropdown) {
-            labDropdown.innerHTML = '<option value="">--Select Lab--</option>'; // Clear existing options
-            labDropdown.disabled = true; // Default to disabled
-
-            if (specificLabSlots && specificLabSlots.length > 0) {
-                // Populate with specific lab slots
-                specificLabSlots.forEach(labPair => {
-                    labDropdown.innerHTML += `<option value="${labPair}">${labPair}</option>`;
-                });
-                labDropdown.disabled = false; // Enable if specific labs found
-            } else if (selectedCoreSlot) { // If a core slot is selected but no specific labs are mapped for it/faculty
-                // Fallback to all lab pairs if no specific mapping, but a core slot is selected
-                allLabPairs.forEach(labPair => {
-                    labDropdown.innerHTML += `<option value="${labPair}">${labPair}</option>`;
-                });
-                labDropdown.disabled = false; // Enable as general labs are available
-            }
-        }
-    }
-}
-
-
-// Function to handle CVLA trio population (C1 -> TC1, TCC1) - triggered by primary slot change
-// This is called by the onchange of CVLA's primary slot, after faculty has filtered the primaries.
-function populateCVLATrio(subjectIndex, choiceIndex, selectedPrimarySlot) {
-    const secondSlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_1`);
-    const tertiarySlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_2`);
-
-    // Clear previous options and reset disabled state
-    secondSlotDropdown.innerHTML = `<option value="">--Secondary--</option>`;
-    tertiarySlotDropdown.innerHTML = `<option value="">--Tertiary--</option>`;
-    secondSlotDropdown.disabled = true;
-    tertiarySlotDropdown.disabled = true;
-
-    if (selectedPrimarySlot && cvlaSlotTrios[selectedPrimarySlot]) {
-        const [secondary, tertiary] = cvlaSlotTrios[selectedPrimarySlot];
-        secondSlotDropdown.innerHTML += `<option value="${secondary}" selected>${secondary}</option>`;
-        tertiarySlotDropdown.innerHTML += `<option value="${tertiary}" selected>${tertiary}</option>`;
-        secondSlotDropdown.disabled = false;
-        tertiarySlotDropdown.disabled = false;
-    }
-}
-
-// Function for populating paired slots (e.g., A1 -> TA1) - now also triggers lab filtering
-// This is called by the onchange of the primary slot for paired subjects.
-function populatePairedSlot(subjectIndex, choiceIndex, selectedPrimarySlot, subjectName) {
-    const secondarySlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_secondary`);
-    const { pairings } = subjectPairedSlotInfo[subjectName];
-
-    secondarySlotDropdown.innerHTML = `<option value="">--Paired Slot--</option>`;
-    secondarySlotDropdown.disabled = true;
-
-    if (selectedPrimarySlot && pairings[selectedPrimarySlot]) {
-        const secondary = pairings[selectedPrimarySlot];
-        secondarySlotDropdown.innerHTML += `<option value="${secondary}" selected>${secondary}</option>`;
-        secondarySlotDropdown.disabled = false;
-    }
-    // Lab filtering is now handled by the extended onchange in generateSlotChoices
+// This function is now mostly redundant as faculty dropdowns are generated within generateSlotChoices
+// Keeping it for potential future general updates if needed, but it will no longer populate faculty.
+function updateFaculties(index) {
+  // Logic that was here has largely moved into generateSlotChoices to ensure correct ordering.
+  // This function can be repurposed or removed if no global faculty updates are needed.
 }
 
 
