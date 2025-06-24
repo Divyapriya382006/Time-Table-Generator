@@ -1,496 +1,507 @@
-<!DOCTYPE html>
+<!--Chatgpt code-->
+
 <html>
 <head>
-    <title>Time Table Generator</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <style>
-        /* Optional: Add some basic styling for better visualization of paired slots */
-        .slot-group-container {
-            border: 1px solid #e0e0e0;
-            padding: 10px;
-            margin-bottom: 10px;
-            background-color: #fcfcfc;
-            border-radius: 5px;
-        }
-        .slot-group-container select {
-            margin-right: 5px;
-        }
-        .slot-group-container label {
-            font-weight: bold;
-            margin-right: 5px;
-        }
+  <title>Time Table Generator</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <style>
+    /* Optional: Add some basic styling for better visualization of paired slots */
+    .slot-group-container {
+      border: 1px solid #e0e0e0;
+      padding: 10px;
+      margin-bottom: 10px;
+      background-color: #fcfcfc;
+      border-radius: 5px;
+    }
+    .slot-group-container select {
+      margin-right: 5px;
+    }
+    .slot-group-container label {
+      font-weight: bold;
+      margin-right: 5px;
+    }
+    /* Removed .lab-slots-container as labs are now inline with slot-choice-line */
+    /* .lab-slots-container {
+        border: 1px dashed #c0c0c0;
+        padding: 8px;
+        margin-top: 10px;
+        background-color: #f0f8ff;
+        border-radius: 4px;
+        display: none;
+    }
+    .lab-slots-container select {
+        margin-bottom: 5px;
+    } */
 
-        /* Adjusted for faculty-slot-lab inline layout */
-        .subject-input-group {
-            display: flex;
-            flex-wrap: wrap; /* Allow wrapping for smaller screens */
-            align-items: center; /* Vertically align items */
-            margin-bottom: 10px;
-        }
-        .subject-input-group label {
-            margin-right: 5px;
-            flex-shrink: 0; /* Prevent label from shrinking */
-        }
-        .subject-input-group select,
-        .subject-input-group input {
-            margin-right: 10px; /* Spacing between elements */
-            margin-bottom: 5px; /* For wrapping elements */
-        }
-        .slot-choice-line {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            margin-bottom: 10px; /* Space between multiple slot choices */
-            border: 1px dashed #e6e6e6; /* Border for each choice group */
-            padding: 8px;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-        }
-        .slot-choice-line label,
-        .slot-choice-line select {
-            margin-right: 8px;
-            margin-bottom: 4px;
-        }
-        .slot-choice-line .lab-select-group {
-            display: flex;
-            flex-direction: column; /* Stack lab dropdowns if multiple */
-            margin-left: 15px; /* Space between core slots and lab slots */
-            padding-left: 15px;
-            border-left: 1px solid #eee;
-        }
-        .slot-choice-line .lab-select-group select {
-            margin-bottom: 5px;
-        }
-    </style>
+    /* Adjusted for faculty-slot-lab inline layout */
+    .subject-input-group {
+        display: flex;
+        flex-wrap: wrap; /* Allow wrapping for smaller screens */
+        align-items: center; /* Vertically align items */
+        margin-bottom: 10px;
+    }
+    .subject-input-group label {
+        margin-right: 5px;
+        flex-shrink: 0; /* Prevent label from shrinking */
+    }
+    .subject-input-group select,
+    .subject-input-group input {
+        margin-right: 10px; /* Spacing between elements */
+        margin-bottom: 5px; /* For wrapping elements */
+    }
+    .slot-choice-line {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 10px; /* Space between multiple slot choices */
+        border: 1px dashed #e6e6e6; /* Border for each choice group */
+        padding: 8px;
+        border-radius: 4px;
+        background-color: #f9f9f9;
+    }
+    .slot-choice-line label,
+    .slot-choice-line select {
+        margin-right: 8px;
+        margin-bottom: 4px;
+    }
+    .slot-choice-line .lab-select-group {
+        display: flex;
+        flex-direction: column; /* Stack lab dropdowns if multiple */
+        margin-left: 15px; /* Space between core slots and lab slots */
+        padding-left: 15px;
+        border-left: 1px solid #eee;
+    }
+    .slot-choice-line .lab-select-group select {
+        margin-bottom: 5px;
+    }
+
+  </style>
 </head>
 <body>
 
-    <h1><b>Time Table Generator</b></h1>
-    <form id="ttform">
-        <p>How many Subjects do you have?</p>
-        <input type="number" min="1" id="subcount" required>
-        <button type="button" onclick="generateInputs()">Next</button>
-        <div id="subjectInputs"></div>
-        <button type="submit">Generate Timetables</button>
-    </form>
+<h1><b>Time Table Generator</b></h1>
+<form id="ttform">
+  <p>How many Subjects do you have?</p>
+  <input type="number" min="1" id="subcount" required>
+  <button type="button" onclick="generateInputs()">Next</button>
+  <div id="subjectInputs"></div>
+  <button type="submit">Generate Timetables</button>
+</form>
 
-    <div id="output"></div>
-    <div id="visualOutput"></div>
+<div id="output"></div>
+<div id="visualOutput"></div>
 
-    <script>
-        const subjectsList = ["CVLA", "MPMC", "JAVA", "STS", "FL", "DSA", "CAO", "OS", "French"];
+<script>
+const subjectsList = ["CVLA", "MPMC", "JAVA", "STS", "FL", "DSA", "CAO", "OS", "French"];
 
-        const facultyMap = {
-            JAVA: ["Anusooya", "Senthil", "Rajesh", "Sivakumar", "Jahangeer", "Jenila", "Rajiv", "Pradeep", "Kanniga", "Saravana", "Jai Vinitha", "Tahir", "Dinakaran"],
-            DSA: ["Kartika", "Abishi", "Rishi", "Bhuvaneshvari", "Uma", "Rolla", "Joe", "Mary", "Raja Shree", "Pravin", "Sendhil", "Senthil Kumar", "Rajakumar", "Uma"],
-            CAO: ["Padma", "Manjula", "Kaja", "Aswiga", "Revathi", "Linda", "Thani", "Sree Prakash"],
-            OS: ["Kumar", "Anita", "Indra", "Vatchala", "Shyamala", "Rabindra", "Yogesh", "Anandan", "Saranya"],
-            CVLA: ["ABHISHEK KUMAR SING", "NATHIYA N", "SAROJ KUMAR DASH", "SANDIP KUMAR DAS", "SETHUKUMARASAMY", "MANIMARAN J", "OM NAMHA SHIVAY", "SUDIP DEBNATH", "ASHIS BERA", "SRUTHA KEERTHI B", "MANIVANNAN A", "VIJAY KUMAR P", "DHIVYA M", "RAJESH KUMAR MOHAPATR", "SOWNDARRAJAN P T", "PADMAJA N", "DURGAPRASAD P", "HARSHAVARTHINI", "BALAJI", "JAYAGOPAL R", "MOHIT KUMAR", "DURGA"],
-            French: ["GOVINDARAJAN P", "CLARISSE ROUABAH", "THANI THAMIZHARASI", "NEWFACULTY"],
-            MPMC: ["ABRAHAM SUDHARSON J", "AMIT KUMAR", "BALAKRISHNAN R", "BERLIN HENCY V", "CHANTHINI BASKAR", "CHITRA K", "DANUSH R", "E MANIKANDAN", "GUGA PRIYA G", "HARIHARAN", "IDAYACHANDRAN G", "JAGANNATH M", "JOHN SAHAYA RANI ALEX", "KARTHIKEYAN P R", "KIRAN KUMAR M", "MOHAMMED AARIF K O", "MUTHULAKSHMI S", "RAVI TIWARI", "REVATHI S", "RICHARDS JOE STANISLAUS", "SARAVANA KUMAR R", "SINDHUJA M", "SOURABH PAUL", "S SELVENDRAN", "SRIDHAR C", "SUBHASHINI N", "SUHASINI S", "SIVASUBRAMANIAN A", "VIGNESWARAN T", "V R BALAJI", "VYDEKI D", "MANOJ KUMAR R", "SUDHARSON J"]
-        };
+const facultyMap = {
+  JAVA: ["Anusooya","Senthil","Rajesh","Sivakumar","Jahangeer","Jenila","Rajiv","Pradeep","Kanniga","Sivakami","Saravana","Marimuthu","Jai Vinitha","Tahir"],
+  DSA: ["Kartika","Abishi","Rishi","Bhuvaneshvari","Uma","Rolla","Joe","Mary","Raja Shree","Pravin","Sendhil","Senthil Kumar","Rajakumar","Uma"],
+  CAO: ["Padma","Manjula","Kaja","Aswiga","Revathi","Linda","Thani","Sree Prakash"],
+  OS: ["Kumar","Anita","Indra","Vatchala","Shyamala","Rabindra","Yogesh","Anandan","Saranya"],
+  CVLA: ["ABHISHEK KUMAR SING","NATHIYA N","SAROJ KUMAR DASH","SANDIP KUMAR DAS","SETHUKUMARASAMY","MANIMARAN J","OM NAMHA SHIVAY","SUDIP DEBNATH","ASHIS BERA","SRUTHA KEERTHI B","MANIVANNAN A","VIJAY KUMAR P","DHIVYA M","RAJESH KUMAR MOHAPATR","SOWNDARRAJAN P T","PADMAJA N","DURGAPRASAD P","HARSHAVARTHINI","BALAJI","JAYAGOPAL R","MOHIT KUMAR","DURGA"],
+  French: ["GOVINDARAJAN P","CLARISSE ROUABAH","THANI THAMIZHARASI","NEWFACULTY"],
+  MPMC: ["ABRAHAM SUDHARSON J","AMIT KUMAR","BALAKRISHNAN R","BERLIN HENCY V","CHANTHINI BASKAR","CHITRA K","DANUSH R","E MANIKANDAN","GUGA PRIYA G","HARIHARAN","IDAYACHANDRAN G","JAGANNATH M","JOHN SAHAYA RANI ALEX","KARTHIKEYAN P R","KIRAN KUMAR M","MOHAMMED AARIF K O","MUTHULAKSHMI S","RAVI TIWARI","REVATHI S","RICHARDS JOE STANISLAUS","SARAVANA KUMAR R","SINDHUJA M","SOURABH PAUL","S SELVENDRAN","SRIDHAR C","SUBHASHINI N","SUHASINI S","SIVASUBRAMANIAN A","VIGNESWARAN T","V R BALAJI","VYDEKI D","MANOJ KUMAR R","SUDHARSON J"]
+};
 
-        const facultySlotMap = {
-            JAVA: {
-                "Anusooya": ["TB1, L29+L30, L31+L32"],
-                "Senthil": ["TB1, L39+L40, L51+L52", "TB2, L1+L2, L19+L20"],
-                "Rajesh": ["TB1, L37+L38, L55+L56", "TB2, L15+L16, L27+L28"],
-                "Sivakumar": ["TB1, L31+L32, L49+L50", "TB2, L47+L48, L53+L54"],
-                "Jahangeer": ["TB1, L31+L32, L49+L50", "TB2, L47+L48, L53+L54"],
-                "Jenila": ["TB1, L29+L30, L43+L44"],
-                "Rajiv": ["TB2, L9+L10, L21+L22"],
-                "Pradeep": ["TB2, L3+L4, L13+L14"],
-                "Kanniga": ["TB1, L31+L32, L49+L50", "TB2, L15+L16, L27+L28"],
-                "Saravana": ["TB1, L39+L40, L51+L52", "TB2, L1+L2, L19+L20"],
-                "Jai Vinitha": ["TB2, L7+L8, L25+L26"],
-                "Tahir": ["TB2, L3+L4, L13+L14"],
-                "Dinakaran": ["TB1, L1+L2, L7+L8"]
+// Define the linked slot trios for CVLA
+const cvlaSlotTrios = {
+    "C1": ["TC1", "TCC1"],
+    "C2": ["TC2", "TCC2"],
+    "A1": ["TA1", "TAA1"],
+    "A2": ["TA2", "TAA2"]
+};
+// Initial choices for the first dropdown for CVLA trios
+const cvlaInitialSlots = Object.keys(cvlaSlotTrios);
+
+
+// Define paired slots for DSA, CAO, OS, MPMC core slots
+const subjectPairedSlotInfo = {
+    DSA: {
+        primaryOptions: ["C1", "C2", "TCC1", "TCC2"],
+        pairings: { "C1": "TC1", "C2": "TC2" }
+    },
+    CAO: {
+        primaryOptions: ["D1", "D2", "TDD1", "TDD2"],
+        pairings: { "D1": "TD1", "D2": "TD2" }
+    },
+    OS: {
+        primaryOptions: ["E1", "E2"],
+        pairings: { "E1": "TE1", "E2": "TE2" }
+    },
+    MPMC: {
+        primaryOptions: ["A1", "D1", "G1", "A2", "D2", "G2"],
+        pairings: {
+            "A1": "TA1", "D1": "TD1", "G1": "TG1",
+            "A2": "TA2", "D2": "TD2", "G2": "TG2"
+        }
+    }
+};
+
+// Generate all consecutive lab slot pairs from L1+L2 to L59+L60
+const allLabPairs = [];
+for (let i = 1; i <= 59; i += 2) {
+    allLabPairs.push(`L${i}+L${i+1}`);
+}
+
+// Define lab slot configurations for subjects that have them
+const subjectLabConfig = {
+    JAVA: { numDropdowns: 2, options: allLabPairs },       // Java will have 2 dropdowns, showing all lab pairs
+    MPMC: { numDropdowns: 1, options: allLabPairs },                // MPMC will have 1 dropdown, showing all lab pairs
+    DSA:  { numDropdowns: 1, options: allLabPairs },                // DSA will have 1 dropdown, showing all lab pairs
+    OS:   { numDropdowns: 1, options: allLabPairs }                // OS will have 1 dropdown, showing all lab pairs
+};
+
+
+// This map is for subjects that *don't* have special pairing/trio logic OR lab slots
+// and use standard single slot dropdowns.
+const subjectSpecificSlots = {
+    JAVA: ["TB1", "TB2"], // Regular core slots for Java, as single choices
+    FL: ["G1", "G2", "B1", "B2"],
+    // STS will use allSlots() as no specific entry here
+    // French will use allSlots() as no specific entry here
+};
+
+
+function allSlots() {
+  let slots = [
+    "A1", "B1", "C1", "D1", "E1", "F1", "G1", "TA1", "TB1", "TC1", "TD1", "TE1", "TF1", "TG1",
+    "A2", "B2", "C2", "D2", "E2", "F2", "G2", "TA2", "TB2", "TC2", "TD2", "TE2", "TF2", "TG2",
+    "TAA1", "TBB1", "TCC1", "TDD1", "TAA2", "TBB2", "TCC2", "TDD2"
+  ];
+  // Add all individual L slots from 1 to 60 to the general pool
+  for (let i = 1; i <= 60; i++) {
+    slots.push(`L${i}`);
+  }
+  return slots;
+}
+
+function generateInputs() {
+  const count = parseInt(document.getElementById("subcount").value);
+  const container = document.getElementById("subjectInputs");
+  container.innerHTML = '';
+
+  for (let i = 0; i < count; i++) {
+    const div = document.createElement("div");
+    div.innerHTML = `
+      <div class="subject-input-group">
+        <label>Subject ${i + 1}:</label>
+        <select name="subject${i}" id="subject${i}" required onchange="generateSlotChoices(${i});">
+          <option value="">--Select--</option>
+          ${subjectsList.map(s => `<option value="${s}">${s}</option>`).join('')}
+        </select>
+        <label>Number of Slot Choices:</label>
+        <input type="number" name="slotCount${i}" id="slotCount${i}" min="1" max="50" value="1" onchange="generateSlotChoices(${i})">
+      </div>
+      <div id="slotChoices${i}"></div>
+      <hr>
+    `;
+    container.appendChild(div);
+    // Initial call to generate slot choices based on default subject or previously selected one
+    generateSlotChoices(i); // This will also call updateFaculties implicitly
+  }
+}
+
+function generateSlotChoices(index) {
+  const count = parseInt(document.getElementById(`slotCount${index}`).value);
+  const slotDiv = document.getElementById(`slotChoices${index}`);
+  slotDiv.innerHTML = '';
+
+  const selectedSubject = document.getElementById(`subject${index}`).value;
+  const facultyList = facultyMap[selectedSubject] || []; // Get faculty list once
+
+  for (let j = 0; j < count; j++) {
+      const slotChoiceLine = document.createElement("div");
+      slotChoiceLine.className = "slot-choice-line";
+
+      // --- Faculty Dropdown (Always first now) ---
+      const facultySelect = document.createElement("select");
+      facultySelect.name = `faculty${index}_${j}`;
+      facultySelect.id = `faculty${index}_${j}`;
+      facultySelect.required = true;
+      // Populate faculty dropdown here
+      facultySelect.innerHTML = '<option value="">--Select Faculty--</option>' + facultyList.map(f => `<option value="${f}">${f}</option>`).join('');
+      slotChoiceLine.appendChild(document.createTextNode('Faculty: '));
+      slotChoiceLine.appendChild(facultySelect);
+
+      // --- Core Slot(s) ---
+      if (selectedSubject === "CVLA") {
+          const primarySlotId = `slots${index}_${j}_0`;
+          const secondarySlotId = `slots${index}_${j}_1`;
+          const tertiarySlotId = `slots${index}_${j}_2`;
+
+          const primarySelect = document.createElement("select");
+          primarySelect.name = primarySlotId;
+          primarySelect.id = primarySlotId;
+          primarySelect.required = true;
+          primarySelect.onchange = () => populateCVLATrio(index, j, primarySelect.value);
+          primarySelect.innerHTML = '<option value="">--Select Primary--</option>' + cvlaInitialSlots.map(s => `<option value="${s}">${s}</option>`).join('');
+
+          const secondarySelect = document.createElement("select");
+          secondarySelect.name = secondarySlotId;
+          secondarySelect.id = secondarySlotId;
+          secondarySelect.required = true;
+          secondarySelect.disabled = true;
+          secondarySelect.innerHTML = '<option value="">--Secondary--</option>';
+
+          const tertiarySelect = document.createElement("select");
+          tertiarySelect.name = tertiarySlotId;
+          tertiarySelect.id = tertiarySlotId;
+          tertiarySelect.required = true;
+          tertiarySelect.disabled = true;
+          tertiarySelect.innerHTML = '<option value="">--Tertiary--</option>';
+
+          slotChoiceLine.appendChild(document.createTextNode(` Trio Choice ${j + 1}: `));
+          slotChoiceLine.appendChild(primarySelect);
+          slotChoiceLine.appendChild(secondarySelect);
+          slotChoiceLine.appendChild(tertiarySelect);
+
+      } else if (subjectPairedSlotInfo[selectedSubject]) {
+          const { primaryOptions } = subjectPairedSlotInfo[selectedSubject];
+          const primarySelectId = `slots${index}_${j}_primary`;
+          const secondarySelectId = `slots${index}_${j}_secondary`;
+
+          const primarySelect = document.createElement("select");
+          primarySelect.name = primarySelectId;
+          primarySelect.id = primarySelectId;
+          primarySelect.required = true;
+          primarySelect.onchange = () => populatePairedSlot(index, j, primarySelect.value, selectedSubject);
+          primarySelect.innerHTML = '<option value="">--Select Primary--</option>' + primaryOptions.map(s => `<option value="${s}">${s}</option>`).join('');
+
+          const secondarySelect = document.createElement("select");
+          secondarySelect.name = secondarySelectId;
+          secondarySelect.id = secondarySelectId;
+          secondarySelect.disabled = true;
+          secondarySelect.innerHTML = '<option value="">--Paired Slot--</option>';
+
+          slotChoiceLine.appendChild(document.createTextNode(` Slot Choice ${j + 1}: `));
+          slotChoiceLine.appendChild(primarySelect);
+          slotChoiceLine.appendChild(secondarySelect);
+
+      } else {
+          const availableSlotsForSubject = subjectSpecificSlots[selectedSubject] || allSlots();
+          const slotSelect = document.createElement("select");
+          slotSelect.name = `slots${index}_${j}`;
+          slotSelect.required = true;
+          slotSelect.innerHTML = availableSlotsForSubject.map(s => `<option value="${s}">${s}</option>`).join('');
+
+          slotChoiceLine.appendChild(document.createTextNode(` Slot Choice ${j + 1}: `));
+          slotChoiceLine.appendChild(slotSelect);
+      }
+
+      // --- Lab Slot(s) (Inline with the current slot choice) ---
+      if (subjectLabConfig[selectedSubject]) {
+          const labConfig = subjectLabConfig[selectedSubject];
+          const labSelectGroup = document.createElement("div");
+          labSelectGroup.className = "lab-select-group";
+          labSelectGroup.appendChild(document.createTextNode('Lab: '));
+
+          for (let k = 0; k < labConfig.numDropdowns; k++) {
+              const labDropdown = document.createElement("select");
+              labDropdown.name = `labSlot${index}_${j}_${k}`; // Unique name per slot choice per dropdown
+              labDropdown.id = `labSlot${index}_${j}_${k}`;
+              labDropdown.required = true;
+
+              let optionsHtml = '<option value="">--Select Lab--</option>';
+              labConfig.options.forEach(labPair => {
+                  optionsHtml += `<option value="${labPair}">${labPair}</option>`;
+              });
+              labDropdown.innerHTML = optionsHtml;
+              labSelectGroup.appendChild(labDropdown);
+          }
+          slotChoiceLine.appendChild(labSelectGroup);
+      }
+      slotDiv.appendChild(slotChoiceLine);
+  }
+}
+
+// Function to handle CVLA trio population (C1 -> TC1, TCC1)
+function populateCVLATrio(subjectIndex, choiceIndex, selectedPrimarySlot) {
+    const secondSlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_1`);
+    const thirdSlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_2`);
+
+    // Clear previous options
+    secondSlotDropdown.innerHTML = '';
+    thirdSlotDropdown.innerHTML = '';
+
+    secondSlotDropdown.disabled = true;
+    thirdSlotDropdown.disabled = true;
+
+    if (selectedPrimarySlot && cvlaSlotTrios[selectedPrimarySlot]) {
+        const [secondary, tertiary] = cvlaSlotTrios[selectedPrimarySlot];
+
+        // Add the automatically filled secondary option
+        const secondaryOption = document.createElement('option');
+        secondaryOption.value = secondary;
+        secondaryOption.textContent = secondary;
+        secondaryOption.selected = true; // Mark as selected
+        secondSlotDropdown.appendChild(secondaryOption);
+        secondSlotDropdown.disabled = false; // Enable
+
+        // Add the automatically filled tertiary option
+        const tertiaryOption = document.createElement('option');
+        tertiaryOption.value = tertiary;
+        tertiaryOption.textContent = tertiary;
+        tertiaryOption.selected = true; // Mark as selected
+        thirdSlotDropdown.appendChild(tertiaryOption);
+        thirdSlotDropdown.disabled = false; // Enable
+    }
+}
+
+// Function for populating paired slots (e.g., A1 -> TA1)
+function populatePairedSlot(subjectIndex, choiceIndex, selectedPrimarySlot, subjectName) {
+    const secondarySlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_secondary`);
+    const { pairings } = subjectPairedSlotInfo[subjectName];
+
+    // Clear previous options
+    secondarySlotDropdown.innerHTML = '';
+    secondarySlotDropdown.disabled = true;
+
+    if (selectedPrimarySlot && pairings[selectedPrimarySlot]) {
+        const secondary = pairings[selectedPrimarySlot];
+        const secondaryOption = document.createElement('option');
+        secondaryOption.value = secondary;
+        secondaryOption.textContent = secondary;
+        secondaryOption.selected = true; // Mark as selected
+        secondarySlotDropdown.appendChild(secondaryOption);
+        secondarySlotDropdown.disabled = false; // Enable
+    }
+}
+
+// This function is now mostly redundant as faculty dropdowns are generated within generateSlotChoices
+// Keeping it for potential future general updates if needed, but it will no longer populate faculty.
+function updateFaculties(index) {
+  // Logic that was here has largely moved into generateSlotChoices to ensure correct ordering.
+  // This function can be repurposed or removed if no global faculty updates are needed.
+}
+
+
+// Inject real timetable generation
+function generateTimetables(event) {
+  event.preventDefault();
+  const formData = new FormData(document.getElementById("ttform"));
+  const subjects = [];
+  const count = parseInt(document.getElementById("subcount").value);
+
+  for (let i = 0; i < count; i++) {
+    const sub = formData.get(`subject${i}`);
+    const slotCount = parseInt(document.getElementById(`slotCount${i}`).value); // Get count from input
+    let fullSlots = [];
+    let teachers = [];
+
+    for (let j = 0; j < slotCount; j++) { // Iterate through each slot choice group
+        const faculty = formData.get(`faculty${i}_${j}`); // Faculty for this specific choice group
+
+        // --- Core slot processing (trios, pairs, or single) ---
+        if (sub === "CVLA") {
+            const primarySlot = formData.get(`slots${i}_${j}_0`);
+            const secondarySlot = formData.get(`slots${i}_${j}_1`);
+            const tertiarySlot = formData.get(`slots${i}_${j}_2`);
+
+            if (primarySlot && secondarySlot && tertiarySlot && faculty) {
+                fullSlots.push(primarySlot, secondarySlot, tertiarySlot);
+                teachers.push(faculty, faculty, faculty); // Same faculty for all three slots in the trio
             }
-        };
+        } else if (subjectPairedSlotInfo[sub]) {
+            const primarySlot = formData.get(`slots${i}_${j}_primary`);
+            const secondarySlot = formData.get(`slots${i}_${j}_secondary`);
 
-
-        // Define the linked slot trios for CVLA
-        const cvlaSlotTrios = {
-            "C1": ["TC1", "TCC1"],
-            "C2": ["TC2", "TCC2"],
-            "A1": ["TA1", "TAA1"],
-            "A2": ["TA2", "TAA2"]
-        };
-        // Initial choices for the first dropdown for CVLA trios
-        const cvlaInitialSlots = Object.keys(cvlaSlotTrios);
-
-
-        // Define paired slots for DSA, CAO, OS, MPMC core slots
-        const subjectPairedSlotInfo = {
-            DSA: {
-                primaryOptions: ["C1", "C2", "TCC1", "TCC2"],
-                pairings: { "C1": "TC1", "C2": "TC2" }
-            },
-            CAO: {
-                primaryOptions: ["D1", "D2", "TDD1", "TDD2"],
-                pairings: { "D1": "TD1", "D2": "TD2" }
-            },
-            OS: {
-                primaryOptions: ["E1", "E2"],
-                pairings: { "E1": "TE1", "E2": "TE2" }
-            },
-            MPMC: {
-                primaryOptions: ["A1", "D1", "G1", "A2", "D2", "G2"],
-                pairings: {
-                    "A1": "TA1", "D1": "TD1", "G1": "TG1",
-                    "A2": "TA2", "D2": "TD2", "G2": "TG2"
+            if (primarySlot && faculty) {
+                fullSlots.push(primarySlot);
+                teachers.push(faculty);
+                if (secondarySlot && secondarySlot !== "--Paired Slot--") {
+                    fullSlots.push(secondarySlot);
+                    teachers.push(faculty);
                 }
             }
-        };
-
-        // Generate all consecutive lab slot pairs from L1+L2 to L59+L60
-        const allLabPairs = [];
-        for (let i = 1; i <= 59; i += 2) {
-            allLabPairs.push(`L${i}+L${i+1}`);
+        } else {
+            fullSlots.push(formData.get(`slots${i}_${j}`));
+            teachers.push(faculty);
         }
 
-        // This map is for subjects that *don't* have special pairing/trio logic OR lab slots
-        // and use standard single slot dropdowns.
-        const subjectSpecificSlots = {
-            // JAVA slots are handled by facultySlotMap now, not here.
-            FL: ["G1", "G2", "B1", "B2"],
-            // STS will use allSlots() as no specific entry here
-            // French will use allSlots() as no specific entry here
-        };
-
-
-        function allSlots() {
-            let slots = [
-                "A1", "B1", "C1", "D1", "E1", "F1", "G1", "TA1", "TB1", "TC1", "TD1", "TE1", "TF1", "TG1",
-                "A2", "B2", "C2", "D2", "E2", "F2", "G2", "TA2", "TB2", "TC2", "TD2", "TE2", "TF2", "TG2",
-                "TAA1", "TBB1", "TCC1", "TDD1", "TAA2", "TBB2", "TCC2", "TDD2"
-            ];
-            // Add all individual L slots from 1 to 60 to the general pool
-            for (let i = 1; i <= 60; i++) {
-                slots.push(`L${i}`);
-            }
-            return slots;
-        }
-
-        function generateInputs() {
-            const count = parseInt(document.getElementById("subcount").value);
-            const container = document.getElementById("subjectInputs");
-            container.innerHTML = '';
-
-            for (let i = 0; i < count; i++) {
-                const div = document.createElement("div");
-                div.innerHTML = `
-                    <div class="subject-input-group">
-                        <label>Subject ${i + 1}:</label>
-                        <select name="subject${i}" id="subject${i}" required onchange="generateSlotChoices(${i});">
-                            <option value="">--Select--</option>
-                            ${subjectsList.map(s => `<option value="${s}">${s}</option>`).join('')}
-                        </select>
-                        <label>Number of Slot Choices:</label>
-                        <input type="number" name="slotCount${i}" id="slotCount${i}" min="1" max="50" value="1" onchange="generateSlotChoices(${i})">
-                    </div>
-                    <div id="slotChoices${i}"></div>
-                    <hr>
-                `;
-                container.appendChild(div);
-                // Initial call to generate slot choices based on default subject or previously selected one
-                generateSlotChoices(i);
-            }
-        }
-
-        function generateSlotChoices(index) {
-            const count = parseInt(document.getElementById(`slotCount${index}`).value);
-            const slotDiv = document.getElementById(`slotChoices${index}`);
-            slotDiv.innerHTML = '';
-
-            const selectedSubject = document.getElementById(`subject${index}`).value;
-            const facultyList = facultyMap[selectedSubject] || []; // Get faculty list once
-
-            for (let j = 0; j < count; j++) {
-                const slotChoiceLine = document.createElement("div");
-                slotChoiceLine.className = "slot-choice-line";
-
-                // --- Faculty Dropdown (Always first now) ---
-                const facultySelect = document.createElement("select");
-                facultySelect.name = `faculty${index}_${j}`;
-                facultySelect.id = `faculty${index}_${j}`;
-                facultySelect.required = true;
-                // Populate faculty dropdown here
-                facultySelect.innerHTML = '<option value="">--Select Faculty--</option>' + facultyList.map(f => `<option value="${f}">${f}</option>`).join('');
-                slotChoiceLine.appendChild(document.createTextNode('Faculty: '));
-                slotChoiceLine.appendChild(facultySelect);
-
-                // Create the core slot dropdown, which will be populated based on the subject and faculty
-                const coreSlotSelect = document.createElement("select");
-                coreSlotSelect.name = `slots${index}_${j}_primary`; // Use a generic name for core slots
-                coreSlotSelect.id = `slots${index}_${j}_primary`;
-                coreSlotSelect.required = true;
-                coreSlotSelect.innerHTML = '<option value="">--Select Slot--</option>'; // Initial empty option
-                slotChoiceLine.appendChild(document.createTextNode(` Slot Choice ${j + 1}: `));
-                slotChoiceLine.appendChild(coreSlotSelect);
-
-                // Additional dropdown for paired slots (e.g., CVLA, DSA, etc.)
-                let secondarySelect = null;
-                let tertiarySelect = null;
-
-                if (selectedSubject === "CVLA") {
-                    secondarySelect = document.createElement("select");
-                    secondarySelect.name = `slots${index}_${j}_secondary`;
-                    secondarySelect.id = `slots${index}_${j}_secondary`;
-                    secondarySelect.required = true;
-                    secondarySelect.disabled = true;
-                    secondarySelect.innerHTML = '<option value="">--Secondary--</option>';
-                    slotChoiceLine.appendChild(secondarySelect);
-
-                    tertiarySelect = document.createElement("select");
-                    tertiarySelect.name = `slots${index}_${j}_tertiary`;
-                    tertiarySelect.id = `slots${index}_${j}_tertiary`;
-                    tertiarySelect.required = true;
-                    tertiarySelect.disabled = true;
-                    tertiarySelect.innerHTML = '<option value="">--Tertiary--</option>';
-                    slotChoiceLine.appendChild(tertiarySelect);
-                } else if (subjectPairedSlotInfo[selectedSubject]) {
-                    secondarySelect = document.createElement("select");
-                    secondarySelect.name = `slots${index}_${j}_secondary`;
-                    secondarySelect.id = `slots${index}_${j}_secondary`;
-                    secondarySelect.disabled = true;
-                    secondarySelect.innerHTML = '<option value="">--Paired Slot--</option>';
-                    slotChoiceLine.appendChild(secondarySelect);
-                }
-
-                // Event listener for faculty select to populate slots
-                facultySelect.onchange = () => {
-                    const selectedFaculty = facultySelect.value;
-                    let availableSlots = [];
-
-                    if (selectedSubject === "JAVA" && facultySlotMap.JAVA && facultySlotMap.JAVA[selectedFaculty]) {
-                        // For JAVA, get slots from facultySlotMap
-                        availableSlots = facultySlotMap.JAVA[selectedFaculty];
-                        // Special handling for JAVA: it implies core + labs together in a single option
-                        coreSlotSelect.innerHTML = '<option value="">--Select Slot--</option>' + 
-                                                   availableSlots.map(s => `<option value="${s}">${s}</option>`).join('');
-                    } else if (selectedSubject === "CVLA") {
-                        // CVLA uses its own initial slot list for the primary dropdown
-                        coreSlotSelect.innerHTML = '<option value="">--Select Primary--</option>' + cvlaInitialSlots.map(s => `<option value="${s}">${s}</option>`).join('');
-                    } else if (subjectPairedSlotInfo[selectedSubject]) {
-                        // Subjects with paired slots use their primaryOptions
-                        const { primaryOptions } = subjectPairedSlotInfo[selectedSubject];
-                        coreSlotSelect.innerHTML = '<option value="">--Select Primary--</option>' + primaryOptions.map(s => `<option value="${s}">${s}</option>`).join('');
-                    } else {
-                        // Other subjects use their specific slots or all slots
-                        availableSlots = subjectSpecificSlots[selectedSubject] || allSlots();
-                        coreSlotSelect.innerHTML = '<option value="">--Select Slot--</option>' + 
-                                                   availableSlots.map(s => `<option value="${s}">${s}</option>`).join('');
-                    }
-
-                    // Reset secondary/tertiary dropdowns when faculty changes
-                    if (secondarySelect) {
-                        secondarySelect.innerHTML = (selectedSubject === "CVLA") ? '<option value="">--Secondary--</option>' : '<option value="">--Paired Slot--</option>';
-                        secondarySelect.disabled = true;
-                    }
-                    if (tertiarySelect) {
-                        tertiarySelect.innerHTML = '<option value="">--Tertiary--</option>';
-                        tertiarySelect.disabled = true;
-                    }
-                };
-
-                // Event listener for core slot select for pairing logic (CVLA, DSA, etc.)
-                coreSlotSelect.onchange = () => {
-                    if (selectedSubject === "CVLA") {
-                        populateCVLATrio(index, j, coreSlotSelect.value);
-                    } else if (subjectPairedSlotInfo[selectedSubject]) {
-                        populatePairedSlot(index, j, coreSlotSelect.value, selectedSubject);
-                    }
-                };
-
-                // Add the populated line to the main slot container
-                slotDiv.appendChild(slotChoiceLine);
-            }
-        }
-
-
-        // Function to handle CVLA trio population (C1 -> TC1, TCC1)
-        function populateCVLATrio(subjectIndex, choiceIndex, selectedPrimarySlot) {
-            const secondSlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_secondary`);
-            const thirdSlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_tertiary`);
-
-            // Clear previous options
-            secondSlotDropdown.innerHTML = '';
-            thirdSlotDropdown.innerHTML = '';
-
-            secondSlotDropdown.disabled = true;
-            thirdSlotDropdown.disabled = true;
-
-            if (selectedPrimarySlot && cvlaSlotTrios[selectedPrimarySlot]) {
-                const [secondary, tertiary] = cvlaSlotTrios[selectedPrimarySlot];
-
-                // Add the automatically filled secondary option
-                const secondaryOption = document.createElement('option');
-                secondaryOption.value = secondary;
-                secondaryOption.textContent = secondary;
-                secondaryOption.selected = true; // Mark as selected
-                secondSlotDropdown.appendChild(secondaryOption);
-                secondSlotDropdown.disabled = false; // Enable
-
-                // Add the automatically filled tertiary option
-                const tertiaryOption = document.createElement('option');
-                tertiaryOption.value = tertiary;
-                tertiaryOption.textContent = tertiary;
-                tertiaryOption.selected = true; // Mark as selected
-                thirdSlotDropdown.appendChild(tertiaryOption);
-                thirdSlotDropdown.disabled = false; // Enable
-            }
-        }
-
-        // Function for populating paired slots (e.g., A1 -> TA1)
-        function populatePairedSlot(subjectIndex, choiceIndex, selectedPrimarySlot, subjectName) {
-            const secondarySlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_secondary`);
-            const { pairings } = subjectPairedSlotInfo[subjectName];
-
-            // Clear previous options
-            secondarySlotDropdown.innerHTML = '';
-            secondarySlotDropdown.disabled = true;
-
-            if (selectedPrimarySlot && pairings[selectedPrimarySlot]) {
-                const secondary = pairings[selectedPrimarySlot];
-                const secondaryOption = document.createElement('option');
-                secondaryOption.value = secondary;
-                secondaryOption.textContent = secondary;
-                secondaryOption.selected = true; // Mark as selected
-                secondarySlotDropdown.appendChild(secondaryOption);
-                secondarySlotDropdown.disabled = false; // Enable
-            }
-        }
-
-        // Inject real timetable generation
-        function generateTimetables(event) {
-            event.preventDefault();
-            const formData = new FormData(document.getElementById("ttform"));
-            const subjects = [];
-            const count = parseInt(document.getElementById("subcount").value);
-
-            for (let i = 0; i < count; i++) {
-                const sub = formData.get(`subject${i}`);
-                const slotCount = parseInt(document.getElementById(`slotCount${i}`).value); // Get count from input
-                let fullSlots = [];
-                let teachers = [];
-
-                for (let j = 0; j < slotCount; j++) { // Iterate through each slot choice group
-                    const faculty = formData.get(`faculty${i}_${j}`); // Faculty for this specific choice group
-
-                    // --- Core slot processing (trios, pairs, or single) ---
-                    if (sub === "CVLA") {
-                        const primarySlot = formData.get(`slots${i}_${j}_primary`); // Changed name for consistency
-                        const secondarySlot = formData.get(`slots${i}_${j}_secondary`);
-                        const tertiarySlot = formData.get(`slots${i}_${j}_tertiary`);
-
-                        if (primarySlot && secondarySlot && tertiarySlot && faculty) {
-                            fullSlots.push(primarySlot, secondarySlot, tertiarySlot);
-                            teachers.push(faculty, faculty, faculty); // Same faculty for all three slots in the trio
-                        }
-                    } else if (subjectPairedSlotInfo[sub]) {
-                        const primarySlot = formData.get(`slots${i}_${j}_primary`);
-                        const secondarySlot = formData.get(`slots${i}_${j}_secondary`);
-
-                        if (primarySlot && faculty) {
-                            fullSlots.push(primarySlot);
-                            teachers.push(faculty);
-                            if (secondarySlot && secondarySlot !== "--Paired Slot--") {
-                                fullSlots.push(secondarySlot);
-                                teachers.push(faculty);
-                            }
-                        }
-                    } else if (sub === "JAVA") {
-                        const selectedJavaSlotOption = formData.get(`slots${i}_${j}_primary`); // e.g., "TB1, L29+L30, L31+L32"
-                        if (selectedJavaSlotOption) {
-                            // Split the string by ", " to get individual slot parts
-                            const slotParts = selectedJavaSlotOption.split(', ').map(part => part.trim());
-                            slotParts.forEach(part => {
-                                if (part.includes('+')) { // It's a lab pair
-                                    const [slot1, slot2] = part.split("+");
-                                    fullSlots.push(slot1, slot2);
-                                    teachers.push(`${sub} Lab Teacher (${faculty})`, `${sub} Lab Teacher (${faculty})`);
-                                } else { // It's a core slot
-                                    fullSlots.push(part);
-                                    teachers.push(faculty);
-                                }
-                            });
-                        }
-                    }
-                    else {
-                        fullSlots.push(formData.get(`slots${i}_${j}_primary`)); // Changed name for consistency
-                        teachers.push(faculty);
-                    }
-                }
-                subjects.push({ name: sub, slots: fullSlots, teachers });
-            }
-
-            const used = {};
-            const allTimetables = [];
-
-            function isClash(slots) {
-                return slots.some(s => used[s]);
-            }
-            function assign(slots, subject, teacher) {
-                slots.forEach((s, idx) => used[s] = `${subject} (${teacher[idx] || teacher[0]})`);
-            }
-            function unassign(slots) {
-                slots.forEach(s => delete used[s]);
-            }
-            function backtrack(idx) {
-                if (idx === subjects.length) return true;
-                const s = subjects[idx];
-                if (!isClash(s.slots)) {
-                    assign(s.slots, s.name, s.teachers);
-                    if (backtrack(idx + 1)) return true;
-                    unassign(s.slots);
-                }
-                return false;
-            }
-
-            let countTT = 0;
-            for (let tries = 0; tries < 20 && countTT < 5; tries++) {
-                Object.keys(used).forEach(k => delete used[k]);
-                if (backtrack(0)) {
-                    allTimetables.push(JSON.parse(JSON.stringify(used)));
-                    countTT++;
+        // --- Lab slot processing (inline for each slot choice) ---
+        if (subjectLabConfig[sub]) {
+            const labConfig = subjectLabConfig[sub];
+            for (let k = 0; k < labConfig.numDropdowns; k++) {
+                const selectedLabPair = formData.get(`labSlot${i}_${j}_${k}`); // Unique name for lab slot
+                if (selectedLabPair) {
+                    const [slot1, slot2] = selectedLabPair.split("+");
+                    fullSlots.push(slot1, slot2);
+                    // Lab teachers are specific to this choice group
+                    teachers.push(`${sub} Lab Teacher (${faculty})`, `${sub} Lab Teacher (${faculty})`);
                 }
             }
-
-            const out = document.getElementById("output");
-            const visual = document.getElementById("visualOutput");
-            out.innerHTML = `<h2>Generated ${countTT} Timetables</h2>`;
-            visual.innerHTML = '';
-
-            const times = ["8:00 AM", "8:55 AM", "9:50 AM", "10:45 AM", "11:40 AM", "12:35 PM", "2:00 PM", "2:55 PM", "3:50 PM"];
-            const days = ["MON", "TUE", "WED", "THU", "FRI"];
-            const slotsMatrix = [
-                ["A1", "F1", "D1", "TB1", "TG1", "S11", "A2", "F2", "D2"],
-                ["B1", "G1", "E1", "TC1", "TAA1", "L12", "B2", "G2", "E2"],
-                ["C1", "A1", "F1", "TD1", "TBB1", "L18", "C2", "A2", "F2"],
-                ["D1", "B1", "G1", "TE1", "TCC1", "L24", "D2", "B2", "G2"],
-                ["E1", "C1", "TA1", "TF1", "TDD1", "S15", "E2", "C2", "TA2"]
-            ];
-
-            allTimetables.forEach((tt, idx) => {
-                let grid = `<h3>Timetable ${idx + 1}</h3><div class='grid-timetable'>`;
-                grid += `<div class='grid-cell row-head'></div>` + times.map(t => `<div class='grid-cell header'>${t}</div>`).join('');
-                days.forEach((day, r) => {
-                    grid += `<div class='grid-cell row-head'>${day}</div>`;
-                    for (let c = 0; c < 9; c++) {
-                        const slot = slotsMatrix[r][c];
-                        grid += `<div class='grid-cell'>${tt[slot] || '-'}</div>`;
-                    }
-                });
-                grid += `</div>`;
-                visual.innerHTML += grid;
-            });
         }
+    }
+    subjects.push({ name: sub, slots: fullSlots, teachers });
+  }
 
-        document.getElementById("ttform").addEventListener("submit", generateTimetables);
-    </script>
+  const used = {};
+  const allTimetables = [];
+
+  function isClash(slots) {
+    return slots.some(s => used[s]);
+  }
+  function assign(slots, subject, teacher) {
+    slots.forEach((s, idx) => used[s] = `${subject} (${teacher[idx] || teacher[0]})`);
+  }
+  function unassign(slots) {
+    slots.forEach(s => delete used[s]);
+  }
+  function backtrack(idx) {
+    if (idx === subjects.length) return true;
+    const s = subjects[idx];
+    if (!isClash(s.slots)) {
+      assign(s.slots, s.name, s.teachers);
+      if (backtrack(idx + 1)) return true;
+      unassign(s.slots);
+    }
+    return false;
+  }
+
+  let countTT = 0;
+  for (let tries = 0; tries < 20 && countTT < 5; tries++) {
+    Object.keys(used).forEach(k => delete used[k]);
+    if (backtrack(0)) {
+      allTimetables.push(JSON.parse(JSON.stringify(used)));
+      countTT++;
+    }
+  }
+
+  const out = document.getElementById("output");
+  const visual = document.getElementById("visualOutput");
+  out.innerHTML = `<h2>Generated ${countTT} Timetables</h2>`;
+  visual.innerHTML = '';
+
+  const times = ["8:00 AM", "8:55 AM", "9:50 AM", "10:45 AM", "11:40 AM", "12:35 PM", "2:00 PM", "2:55 PM", "3:50 PM"];
+  const days = ["MON","TUE","WED","THU","FRI"];
+  const slotsMatrix = [
+    ["A1","F1","D1","TB1","TG1","S11","A2","F2","D2"],
+    ["B1","G1","E1","TC1","TAA1","L12","B2","G2","E2"],
+    ["C1","A1","F1","TD1","TBB1","L18","C2","A2","F2"],
+    ["D1","B1","G1","TE1","TCC1","L24","D2","B2","G2"],
+    ["E1","C1","TA1","TF1","TDD1","S15","E2","C2","TA2"]
+  ];
+
+  allTimetables.forEach((tt, idx) => {
+    let grid = `<h3>Timetable ${idx + 1}</h3><div class='grid-timetable'>`;
+    grid += `<div class='grid-cell row-head'></div>` + times.map(t => `<div class='grid-cell header'>${t}</div>`).join('');
+    days.forEach((day, r) => {
+      grid += `<div class='grid-cell row-head'>${day}</div>`;
+      for (let c = 0; c < 9; c++) {
+        const slot = slotsMatrix[r][c];
+        grid += `<div class='grid-cell'>${tt[slot] || '-'}</div>`;
+      }
+    });
+    grid += `</div>`;
+    visual.innerHTML += grid;
+  });
+}
+
+document.getElementById("ttform").addEventListener("submit", generateTimetables);
+</script>
 
 </body>
 </html>
