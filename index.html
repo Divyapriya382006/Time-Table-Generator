@@ -98,13 +98,13 @@ const subjectsList = ["CVLA", "MPMC", "JAVA", "STS", "FL", "DSA", "CAO", "OS", "
 
 const facultyMap = {
   STS:["Ethnus"],
-  JAVA: ["Anusooya","Senthil","Rajesh","Sivakumar","Jahangeer","Jenila","Rajiv","Pradeep","Kanniga","Sivakami","Saravana","Marimuthu","Jai Vinitha","Tahir"],
-  DSA: ["Kartika","Abishi","Rishi","Bhuvaneshvari","Uma","Rolla","Joe","Mary","Raja Shree","Pravin","Sendhil","Senthil Kumar","Rajakumar","Uma"],
+  JAVA: ["Anusooya","Senthil","Rajesh","Sivakumar","Jahangeer","Jenila","Rajiv","Pradeep","Kanniga","Saravana","Jai Vinitha","Tahir","Dinakaran","Rajiv"],
+  DSA: ["Abishi","Rishi","Uma","Rolla","Joe","Mary","Raja Shree","Senthil Kumar"],
   CAO: ["Padma","Manjula","Kaja","Aswiga","Revathi","Linda","Thani","Sree Prakash"],
-  OS: ["Kumar","Anita","Indra","Vatchala","Shyamala","Rabindra","Yogesh","Anandan","Saranya"],
-  CVLA: ["ABHISHEK KUMAR SING","NATHIYA N","SAROJ KUMAR DASH","SANDIP KUMAR DAS","SETHUKUMARASAMY","MANIMARAN J","OM NAMHA SHIVAY","SUDIP DEBNATH","ASHIS BERA","SRUTHA KEERTHI B","MANIVANNAN A","VIJAY KUMAR P","DHIVYA M","RAJESH KUMAR MOHAPATR","SOWNDARRAJAN P T","PADMAJA N","DURGAPRASAD P","HARSHAVARTHINI","BALAJI","JAYAGOPAL R","MOHIT KUMAR","DURGA"],
+  OS: ["Kumar","Indra","Vatchala","Shyamala","Yogesh","Anandan","Saranya"],
+  CVLA: ["ABHISHEK KUMAR SING","NATHIYA N","SAROJ KUMAR DASH","SANDIP KUMAR DAS","ASHIS BERA","SRUTHA KEERTHI B","MANIVANNAN A","VIJAY KUMAR P","DHIVYA M","RAJESH KUMAR MOHAPATR","SOWNDARRAJAN P T","PADMAJA N","DURGAPRASAD P","HARSHAVARTHINI","BALAJI","JAYAGOPAL R","MOHIT KUMAR","DURGA"],
   French: ["GOVINDARAJAN P","CLARISSE ROUABAH","THANI THAMIZHARASI","NEWFACULTY"],
-  MPMC: ["ABRAHAM SUDHARSON J","AMIT KUMAR","BALAKRISHNAN R","BERLIN HENCY V","CHANTHINI BASKAR","CHITRA K","DANUSH R","E MANIKANDAN","GUGA PRIYA G","HARIHARAN","IDAYACHANDRAN G","JAGANNATH M","JOHN SAHAYA RANI ALEX","KARTHIKEYAN P R","KIRAN KUMAR M","MOHAMMED AARIF K O","MUTHULAKSHMI S","RAVI TIWARI","REVATHI S","RICHARDS JOE STANISLAUS","SARAVANA KUMAR R","SINDHUJA M","SOURABH PAUL","S SELVENDRAN","SRIDHAR C","SUBHASHINI N","SUHASINI S","SIVASUBRAMANIAN A","VIGNESWARAN T","V R BALAJI","VYDEKI D","MANOJ KUMAR R","SUDHARSON J"]
+  MPMC: ["ABRAHAM SUDHARSON J","AMIT KUMAR","BALAKRISHNAN R","BERLIN HENCY V","CHANTHINI BASKAR","CHITRA K","DANUSH R","E MANIKANDAN","GUGA PRIYA G","HARIHARAN","IDAYACHANDRAN G","JAGANNATH M","JOHN SAHAYA RANI ALEX","KARTHIKEYAN P R","KIRAN KUMAR M","MOHAMMED AARIF K O","MUTHULAKSHMI S","RAVI TIWARI","REVATHI S","RICHARDS JOE STANISLAUS","SARAVANA KUMAR R","SINDHUJA M","S SELVENDRAN","SRIDHAR C","SUBHASHINI N","SUHASINI S","SIVASUBRAMANIAN A","VIGNESWARAN T","V R BALAJI","VYDEKI D","SUDHARSON J"]
 };
 
 // Define the linked slot trios for CVLA
@@ -121,11 +121,11 @@ const cvlaInitialSlots = Object.keys(cvlaSlotTrios);
 // Define paired slots for DSA, CAO, OS, MPMC core slots
 const subjectPairedSlotInfo = {
     DSA: {
-        primaryOptions: ["C1", "C2", "TCC1", "TCC2"],
+        primaryOptions: ["C1", "C2"],
         pairings: { "C1": "TC1", "C2": "TC2" }
     },
     CAO: {
-        primaryOptions: ["D1", "D2", "TDD1", "TDD2"],
+        primaryOptions: ["D1", "D2"],
         pairings: { "D1": "TD1", "D2": "TD2" }
     },
     OS: {
