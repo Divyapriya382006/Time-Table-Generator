@@ -1,507 +1,883 @@
-<!--Chatgpt code-->
-
+<!DOCTYPE html>
 <html>
 <head>
-  <title>Time Table Generator</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" type="text/css" href="style.css">
-  <style>
-    /* Optional: Add some basic styling for better visualization of paired slots */
-    .slot-group-container {
-      border: 1px solid #e0e0e0;
-      padding: 10px;
-      margin-bottom: 10px;
-      background-color: #fcfcfc;
-      border-radius: 5px;
-    }
-    .slot-group-container select {
-      margin-right: 5px;
-    }
-    .slot-group-container label {
-      font-weight: bold;
-      margin-right: 5px;
-    }
-    /* Removed .lab-slots-container as labs are now inline with slot-choice-line */
-    /* .lab-slots-container {
-        border: 1px dashed #c0c0c0;
-        padding: 8px;
-        margin-top: 10px;
-        background-color: #f0f8ff;
-        border-radius: 4px;
-        display: none;
-    }
-    .lab-slots-container select {
-        margin-bottom: 5px;
-    } */
+    <title>Time Table Generator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Basic styling for better visualization */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h3, h4 {
+            color: #2c3e50;
+        }
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        input[type="number"], select {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 20px 0;
+        }
 
-    /* Adjusted for faculty-slot-lab inline layout */
-    .subject-input-group {
-        display: flex;
-        flex-wrap: wrap; /* Allow wrapping for smaller screens */
-        align-items: center; /* Vertically align items */
-        margin-bottom: 10px;
-    }
-    .subject-input-group label {
-        margin-right: 5px;
-        flex-shrink: 0; /* Prevent label from shrinking */
-    }
-    .subject-input-group select,
-    .subject-input-group input {
-        margin-right: 10px; /* Spacing between elements */
-        margin-bottom: 5px; /* For wrapping elements */
-    }
-    .slot-choice-line {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        margin-bottom: 10px; /* Space between multiple slot choices */
-        border: 1px dashed #e6e6e6; /* Border for each choice group */
-        padding: 8px;
-        border-radius: 4px;
-        background-color: #f9f9f9;
-    }
-    .slot-choice-line label,
-    .slot-choice-line select {
-        margin-right: 8px;
-        margin-bottom: 4px;
-    }
-    .slot-choice-line .lab-select-group {
-        display: flex;
-        flex-direction: column; /* Stack lab dropdowns if multiple */
-        margin-left: 15px; /* Space between core slots and lab slots */
-        padding-left: 15px;
-        border-left: 1px solid #eee;
-    }
-    .slot-choice-line .lab-select-group select {
-        margin-bottom: 5px;
-    }
+        /* Input Group Styling */
+        .subject-input-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .subject-input-group label {
+            margin-right: 5px;
+            flex-shrink: 0;
+            font-weight: bold;
+        }
+        .slot-choice-line {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 10px;
+            border: 1px dashed #e6e6e6;
+            padding: 8px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .slot-choice-line label,
+        .slot-choice-line select,
+        .slot-choice-line input {
+            margin-right: 8px;
+            margin-bottom: 4px;
+        }
+        .slot-choice-line .lab-select-group {
+            display: flex;
+            flex-direction: column;
+            margin-left: 15px;
+            padding-left: 15px;
+            border-left: 1px solid #eee;
+        }
+        .slot-choice-line .lab-select-group select {
+            margin-bottom: 5px;
+        }
 
-  </style>
+        /* Timetable Grid Styling */
+        .grid-timetable {
+            display: grid;
+            grid-template-columns: 80px repeat(9, 1fr);
+            border: 1px solid #ccc;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            background-color: #fff;
+        }
+        .grid-cell {
+            border: 1px solid #eee;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.8em;
+            word-break: break-word;
+            min-height: 40px; /* Ensure consistent height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .grid-cell.header {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            color: #555;
+        }
+        .grid-cell.row-head {
+            background-color: #e0e0e0;
+            font-weight: bold;
+            text-align: left;
+            padding-left: 10px;
+            color: #444;
+        }
+        #output, #visualOutput {
+            margin-top: 30px;
+        }
+        #visualOutput > div {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        /* Lab List Styling */
+        .lab-list {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 15px;
+            border: 1px dashed #c0c0c0;
+            padding: 10px;
+            background-color: #f8f8f8;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .lab-list li {
+            margin-bottom: 3px;
+        }
+        .lab-list li:last-child {
+            margin-bottom: 0;
+        }
+    </style>
 </head>
 <body>
 
-<h1><b>Time Table Generator</b></h1>
-<form id="ttform">
-  <p>How many Subjects do you have?</p>
-  <input type="number" min="1" id="subcount" required>
-  <button type="button" onclick="generateInputs()">Next</button>
-  <div id="subjectInputs"></div>
-  <button type="submit">Generate Timetables</button>
-</form>
+    <h1><b>Time Table Generator</b></h1>
+    <form id="ttform">
+        <p>How many Subjects do you have?</p>
+        <input type="number" min="1" id="subcount" required value="1">
+        <button type="button" onclick="generateInputs()">Next</button>
+        <div id="subjectInputs"></div>
+        <button type="submit">Generate Timetables</button>
+    </form>
 
-<div id="output"></div>
-<div id="visualOutput"></div>
+    <div id="output"></div>
+    <div id="visualOutput"></div>
 
-<script>
-const subjectsList = ["CVLA", "MPMC", "JAVA", "STS", "FL", "DSA", "CAO", "OS", "French"];
+    <script>
+        const subjectsList = ["CVLA", "MPMC", "JAVA", "STS", "FL", "DSA", "CAO", "OS", "French"];
 
-const facultyMap = {
-  JAVA: ["Anusooya","Senthil","Rajesh","Sivakumar","Jahangeer","Jenila","Rajiv","Pradeep","Kanniga","Sivakami","Saravana","Marimuthu","Jai Vinitha","Tahir"],
-  DSA: ["Kartika","Abishi","Rishi","Bhuvaneshvari","Uma","Rolla","Joe","Mary","Raja Shree","Pravin","Sendhil","Senthil Kumar","Rajakumar","Uma"],
-  CAO: ["Padma","Manjula","Kaja","Aswiga","Revathi","Linda","Thani","Sree Prakash"],
-  OS: ["Kumar","Anita","Indra","Vatchala","Shyamala","Rabindra","Yogesh","Anandan","Saranya"],
-  CVLA: ["ABHISHEK KUMAR SING","NATHIYA N","SAROJ KUMAR DASH","SANDIP KUMAR DAS","SETHUKUMARASAMY","MANIMARAN J","OM NAMHA SHIVAY","SUDIP DEBNATH","ASHIS BERA","SRUTHA KEERTHI B","MANIVANNAN A","VIJAY KUMAR P","DHIVYA M","RAJESH KUMAR MOHAPATR","SOWNDARRAJAN P T","PADMAJA N","DURGAPRASAD P","HARSHAVARTHINI","BALAJI","JAYAGOPAL R","MOHIT KUMAR","DURGA"],
-  French: ["GOVINDARAJAN P","CLARISSE ROUABAH","THANI THAMIZHARASI","NEWFACULTY"],
-  MPMC: ["ABRAHAM SUDHARSON J","AMIT KUMAR","BALAKRISHNAN R","BERLIN HENCY V","CHANTHINI BASKAR","CHITRA K","DANUSH R","E MANIKANDAN","GUGA PRIYA G","HARIHARAN","IDAYACHANDRAN G","JAGANNATH M","JOHN SAHAYA RANI ALEX","KARTHIKEYAN P R","KIRAN KUMAR M","MOHAMMED AARIF K O","MUTHULAKSHMI S","RAVI TIWARI","REVATHI S","RICHARDS JOE STANISLAUS","SARAVANA KUMAR R","SINDHUJA M","SOURABH PAUL","S SELVENDRAN","SRIDHAR C","SUBHASHINI N","SUHASINI S","SIVASUBRAMANIAN A","VIGNESWARAN T","V R BALAJI","VYDEKI D","MANOJ KUMAR R","SUDHARSON J"]
-};
+        const facultyMap = {
+            STS:["Ethnus"],
+            JAVA: ["Anusooya","Senthil","Rajesh","Sivakumar","Jahangeer","Jenila","Rajiv","Pradeep","Kanniga","Sivakami","Saravana","Marimuthu","Jai Vinitha","Tahir"],
+            DSA: ["Kartika","Abishi","Rishi","Bhuvaneshvari","Uma","Rolla","Joe","Mary","Raja Shree","Pravin","Sendhil","Senthil Kumar","Rajakumar","Uma"],
+            CAO: ["Padma","Manjula","Kaja","Aswiga","Revathi","Linda","Thani","Sree Prakash"],
+            OS: ["Kumar","Anita","Indra","Vatchala","Shyamala","Rabindra","Yogesh","Anandan","Saranya"],
+            CVLA: ["ABHISHEK KUMAR SING","NATHIYA N","SAROJ KUMAR DASH","SANDIP KUMAR DAS","SETHUKUMARASAMY","MANIMARAN J","OM NAMHA SHIVAY","SUDIP DEBNATH","ASHIS BERA","SRUTHA KEERTHI B","MANIVANNAN A","VIJAY KUMAR P","DHIVYA M","RAJESH KUMAR MOHAPATR","SOWNDARRAJAN P T","PADMAJA N","DURGAPRASAD P","HARSHAVARTHINI","BALAJI","JAYAGOPAL R","MOHIT KUMAR","DURGA"],
+            French: ["GOVINDARAJAN P","CLARISSE ROUABAH","THANI THAMIZHARASI","NEWFACULTY"],
+            MPMC: ["ABRAHAM SUDHARSON J","AMIT KUMAR","BALAKRISHNAN R","BERLIN HENCY V","CHANTHINI BASKAR","CHITRA K","DANUSH R","E MANIKANDAN","GUGA PRIYA G","HARIHARAN","IDAYACHANDRAN G","JAGANNATH M","JOHN SAHAYA RANI ALEX","KARTHIKEYAN P R","KIRAN KUMAR M","MOHAMMED AARIF K O","MUTHULAKSHMI S","RAVI TIWARI","REVATHI S","RICHARDS JOE STANISLAUS","SARAVANA KUMAR R","SINDHUJA M","SOURABH PAUL","S SELVENDRAN","SRIDHAR C","SUBHASHINI N","SIVASUBRAMANIAN A","VIGNESWARAN T","V R BALAJI","VYDEKI D","MANOJ KUMAR R","SUDHARSON J"]
+        };
 
-// Define the linked slot trios for CVLA
-const cvlaSlotTrios = {
-    "C1": ["TC1", "TCC1"],
-    "C2": ["TC2", "TCC2"],
-    "A1": ["TA1", "TAA1"],
-    "A2": ["TA2", "TAA2"]
-};
-// Initial choices for the first dropdown for CVLA trios
-const cvlaInitialSlots = Object.keys(cvlaSlotTrios);
+        // Define the linked slot trios for CVLA
+        const cvlaSlotTrios = {
+            "C1": ["TC1", "TCC1"],
+            "C2": ["TC2", "TCC2"],
+            "A1": ["TA1", "TAA1"],
+            "A2": ["TA2", "TAA2"]
+        };
+        // Initial choices for the first dropdown for CVLA trios
+        const cvlaInitialSlots = Object.keys(cvlaSlotTrios);
 
-
-// Define paired slots for DSA, CAO, OS, MPMC core slots
-const subjectPairedSlotInfo = {
-    DSA: {
-        primaryOptions: ["C1", "C2", "TCC1", "TCC2"],
-        pairings: { "C1": "TC1", "C2": "TC2" }
-    },
-    CAO: {
-        primaryOptions: ["D1", "D2", "TDD1", "TDD2"],
-        pairings: { "D1": "TD1", "D2": "TD2" }
-    },
-    OS: {
-        primaryOptions: ["E1", "E2"],
-        pairings: { "E1": "TE1", "E2": "TE2" }
-    },
-    MPMC: {
-        primaryOptions: ["A1", "D1", "G1", "A2", "D2", "G2"],
-        pairings: {
-            "A1": "TA1", "D1": "TD1", "G1": "TG1",
-            "A2": "TA2", "D2": "TD2", "G2": "TG2"
-        }
-    }
-};
-
-// Generate all consecutive lab slot pairs from L1+L2 to L59+L60
-const allLabPairs = [];
-for (let i = 1; i <= 59; i += 2) {
-    allLabPairs.push(`L${i}+L${i+1}`);
-}
-
-// Define lab slot configurations for subjects that have them
-const subjectLabConfig = {
-    JAVA: { numDropdowns: 2, options: allLabPairs },       // Java will have 2 dropdowns, showing all lab pairs
-    MPMC: { numDropdowns: 1, options: allLabPairs },                // MPMC will have 1 dropdown, showing all lab pairs
-    DSA:  { numDropdowns: 1, options: allLabPairs },                // DSA will have 1 dropdown, showing all lab pairs
-    OS:   { numDropdowns: 1, options: allLabPairs }                // OS will have 1 dropdown, showing all lab pairs
-};
-
-
-// This map is for subjects that *don't* have special pairing/trio logic OR lab slots
-// and use standard single slot dropdowns.
-const subjectSpecificSlots = {
-    JAVA: ["TB1", "TB2"], // Regular core slots for Java, as single choices
-    FL: ["G1", "G2", "B1", "B2"],
-    // STS will use allSlots() as no specific entry here
-    // French will use allSlots() as no specific entry here
-};
-
-
-function allSlots() {
-  let slots = [
-    "A1", "B1", "C1", "D1", "E1", "F1", "G1", "TA1", "TB1", "TC1", "TD1", "TE1", "TF1", "TG1",
-    "A2", "B2", "C2", "D2", "E2", "F2", "G2", "TA2", "TB2", "TC2", "TD2", "TE2", "TF2", "TG2",
-    "TAA1", "TBB1", "TCC1", "TDD1", "TAA2", "TBB2", "TCC2", "TDD2"
-  ];
-  // Add all individual L slots from 1 to 60 to the general pool
-  for (let i = 1; i <= 60; i++) {
-    slots.push(`L${i}`);
-  }
-  return slots;
-}
-
-function generateInputs() {
-  const count = parseInt(document.getElementById("subcount").value);
-  const container = document.getElementById("subjectInputs");
-  container.innerHTML = '';
-
-  for (let i = 0; i < count; i++) {
-    const div = document.createElement("div");
-    div.innerHTML = `
-      <div class="subject-input-group">
-        <label>Subject ${i + 1}:</label>
-        <select name="subject${i}" id="subject${i}" required onchange="generateSlotChoices(${i});">
-          <option value="">--Select--</option>
-          ${subjectsList.map(s => `<option value="${s}">${s}</option>`).join('')}
-        </select>
-        <label>Number of Slot Choices:</label>
-        <input type="number" name="slotCount${i}" id="slotCount${i}" min="1" max="50" value="1" onchange="generateSlotChoices(${i})">
-      </div>
-      <div id="slotChoices${i}"></div>
-      <hr>
-    `;
-    container.appendChild(div);
-    // Initial call to generate slot choices based on default subject or previously selected one
-    generateSlotChoices(i); // This will also call updateFaculties implicitly
-  }
-}
-
-function generateSlotChoices(index) {
-  const count = parseInt(document.getElementById(`slotCount${index}`).value);
-  const slotDiv = document.getElementById(`slotChoices${index}`);
-  slotDiv.innerHTML = '';
-
-  const selectedSubject = document.getElementById(`subject${index}`).value;
-  const facultyList = facultyMap[selectedSubject] || []; // Get faculty list once
-
-  for (let j = 0; j < count; j++) {
-      const slotChoiceLine = document.createElement("div");
-      slotChoiceLine.className = "slot-choice-line";
-
-      // --- Faculty Dropdown (Always first now) ---
-      const facultySelect = document.createElement("select");
-      facultySelect.name = `faculty${index}_${j}`;
-      facultySelect.id = `faculty${index}_${j}`;
-      facultySelect.required = true;
-      // Populate faculty dropdown here
-      facultySelect.innerHTML = '<option value="">--Select Faculty--</option>' + facultyList.map(f => `<option value="${f}">${f}</option>`).join('');
-      slotChoiceLine.appendChild(document.createTextNode('Faculty: '));
-      slotChoiceLine.appendChild(facultySelect);
-
-      // --- Core Slot(s) ---
-      if (selectedSubject === "CVLA") {
-          const primarySlotId = `slots${index}_${j}_0`;
-          const secondarySlotId = `slots${index}_${j}_1`;
-          const tertiarySlotId = `slots${index}_${j}_2`;
-
-          const primarySelect = document.createElement("select");
-          primarySelect.name = primarySlotId;
-          primarySelect.id = primarySlotId;
-          primarySelect.required = true;
-          primarySelect.onchange = () => populateCVLATrio(index, j, primarySelect.value);
-          primarySelect.innerHTML = '<option value="">--Select Primary--</option>' + cvlaInitialSlots.map(s => `<option value="${s}">${s}</option>`).join('');
-
-          const secondarySelect = document.createElement("select");
-          secondarySelect.name = secondarySlotId;
-          secondarySelect.id = secondarySlotId;
-          secondarySelect.required = true;
-          secondarySelect.disabled = true;
-          secondarySelect.innerHTML = '<option value="">--Secondary--</option>';
-
-          const tertiarySelect = document.createElement("select");
-          tertiarySelect.name = tertiarySlotId;
-          tertiarySelect.id = tertiarySlotId;
-          tertiarySelect.required = true;
-          tertiarySelect.disabled = true;
-          tertiarySelect.innerHTML = '<option value="">--Tertiary--</option>';
-
-          slotChoiceLine.appendChild(document.createTextNode(` Trio Choice ${j + 1}: `));
-          slotChoiceLine.appendChild(primarySelect);
-          slotChoiceLine.appendChild(secondarySelect);
-          slotChoiceLine.appendChild(tertiarySelect);
-
-      } else if (subjectPairedSlotInfo[selectedSubject]) {
-          const { primaryOptions } = subjectPairedSlotInfo[selectedSubject];
-          const primarySelectId = `slots${index}_${j}_primary`;
-          const secondarySelectId = `slots${index}_${j}_secondary`;
-
-          const primarySelect = document.createElement("select");
-          primarySelect.name = primarySelectId;
-          primarySelect.id = primarySelectId;
-          primarySelect.required = true;
-          primarySelect.onchange = () => populatePairedSlot(index, j, primarySelect.value, selectedSubject);
-          primarySelect.innerHTML = '<option value="">--Select Primary--</option>' + primaryOptions.map(s => `<option value="${s}">${s}</option>`).join('');
-
-          const secondarySelect = document.createElement("select");
-          secondarySelect.name = secondarySelectId;
-          secondarySelect.id = secondarySelectId;
-          secondarySelect.disabled = true;
-          secondarySelect.innerHTML = '<option value="">--Paired Slot--</option>';
-
-          slotChoiceLine.appendChild(document.createTextNode(` Slot Choice ${j + 1}: `));
-          slotChoiceLine.appendChild(primarySelect);
-          slotChoiceLine.appendChild(secondarySelect);
-
-      } else {
-          const availableSlotsForSubject = subjectSpecificSlots[selectedSubject] || allSlots();
-          const slotSelect = document.createElement("select");
-          slotSelect.name = `slots${index}_${j}`;
-          slotSelect.required = true;
-          slotSelect.innerHTML = availableSlotsForSubject.map(s => `<option value="${s}">${s}</option>`).join('');
-
-          slotChoiceLine.appendChild(document.createTextNode(` Slot Choice ${j + 1}: `));
-          slotChoiceLine.appendChild(slotSelect);
-      }
-
-      // --- Lab Slot(s) (Inline with the current slot choice) ---
-      if (subjectLabConfig[selectedSubject]) {
-          const labConfig = subjectLabConfig[selectedSubject];
-          const labSelectGroup = document.createElement("div");
-          labSelectGroup.className = "lab-select-group";
-          labSelectGroup.appendChild(document.createTextNode('Lab: '));
-
-          for (let k = 0; k < labConfig.numDropdowns; k++) {
-              const labDropdown = document.createElement("select");
-              labDropdown.name = `labSlot${index}_${j}_${k}`; // Unique name per slot choice per dropdown
-              labDropdown.id = `labSlot${index}_${j}_${k}`;
-              labDropdown.required = true;
-
-              let optionsHtml = '<option value="">--Select Lab--</option>';
-              labConfig.options.forEach(labPair => {
-                  optionsHtml += `<option value="${labPair}">${labPair}</option>`;
-              });
-              labDropdown.innerHTML = optionsHtml;
-              labSelectGroup.appendChild(labDropdown);
-          }
-          slotChoiceLine.appendChild(labSelectGroup);
-      }
-      slotDiv.appendChild(slotChoiceLine);
-  }
-}
-
-// Function to handle CVLA trio population (C1 -> TC1, TCC1)
-function populateCVLATrio(subjectIndex, choiceIndex, selectedPrimarySlot) {
-    const secondSlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_1`);
-    const thirdSlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_2`);
-
-    // Clear previous options
-    secondSlotDropdown.innerHTML = '';
-    thirdSlotDropdown.innerHTML = '';
-
-    secondSlotDropdown.disabled = true;
-    thirdSlotDropdown.disabled = true;
-
-    if (selectedPrimarySlot && cvlaSlotTrios[selectedPrimarySlot]) {
-        const [secondary, tertiary] = cvlaSlotTrios[selectedPrimarySlot];
-
-        // Add the automatically filled secondary option
-        const secondaryOption = document.createElement('option');
-        secondaryOption.value = secondary;
-        secondaryOption.textContent = secondary;
-        secondaryOption.selected = true; // Mark as selected
-        secondSlotDropdown.appendChild(secondaryOption);
-        secondSlotDropdown.disabled = false; // Enable
-
-        // Add the automatically filled tertiary option
-        const tertiaryOption = document.createElement('option');
-        tertiaryOption.value = tertiary;
-        tertiaryOption.textContent = tertiary;
-        tertiaryOption.selected = true; // Mark as selected
-        thirdSlotDropdown.appendChild(tertiaryOption);
-        thirdSlotDropdown.disabled = false; // Enable
-    }
-}
-
-// Function for populating paired slots (e.g., A1 -> TA1)
-function populatePairedSlot(subjectIndex, choiceIndex, selectedPrimarySlot, subjectName) {
-    const secondarySlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_secondary`);
-    const { pairings } = subjectPairedSlotInfo[subjectName];
-
-    // Clear previous options
-    secondarySlotDropdown.innerHTML = '';
-    secondarySlotDropdown.disabled = true;
-
-    if (selectedPrimarySlot && pairings[selectedPrimarySlot]) {
-        const secondary = pairings[selectedPrimarySlot];
-        const secondaryOption = document.createElement('option');
-        secondaryOption.value = secondary;
-        secondaryOption.textContent = secondary;
-        secondaryOption.selected = true; // Mark as selected
-        secondarySlotDropdown.appendChild(secondaryOption);
-        secondarySlotDropdown.disabled = false; // Enable
-    }
-}
-
-// This function is now mostly redundant as faculty dropdowns are generated within generateSlotChoices
-// Keeping it for potential future general updates if needed, but it will no longer populate faculty.
-function updateFaculties(index) {
-  // Logic that was here has largely moved into generateSlotChoices to ensure correct ordering.
-  // This function can be repurposed or removed if no global faculty updates are needed.
-}
-
-
-// Inject real timetable generation
-function generateTimetables(event) {
-  event.preventDefault();
-  const formData = new FormData(document.getElementById("ttform"));
-  const subjects = [];
-  const count = parseInt(document.getElementById("subcount").value);
-
-  for (let i = 0; i < count; i++) {
-    const sub = formData.get(`subject${i}`);
-    const slotCount = parseInt(document.getElementById(`slotCount${i}`).value); // Get count from input
-    let fullSlots = [];
-    let teachers = [];
-
-    for (let j = 0; j < slotCount; j++) { // Iterate through each slot choice group
-        const faculty = formData.get(`faculty${i}_${j}`); // Faculty for this specific choice group
-
-        // --- Core slot processing (trios, pairs, or single) ---
-        if (sub === "CVLA") {
-            const primarySlot = formData.get(`slots${i}_${j}_0`);
-            const secondarySlot = formData.get(`slots${i}_${j}_1`);
-            const tertiarySlot = formData.get(`slots${i}_${j}_2`);
-
-            if (primarySlot && secondarySlot && tertiarySlot && faculty) {
-                fullSlots.push(primarySlot, secondarySlot, tertiarySlot);
-                teachers.push(faculty, faculty, faculty); // Same faculty for all three slots in the trio
-            }
-        } else if (subjectPairedSlotInfo[sub]) {
-            const primarySlot = formData.get(`slots${i}_${j}_primary`);
-            const secondarySlot = formData.get(`slots${i}_${j}_secondary`);
-
-            if (primarySlot && faculty) {
-                fullSlots.push(primarySlot);
-                teachers.push(faculty);
-                if (secondarySlot && secondarySlot !== "--Paired Slot--") {
-                    fullSlots.push(secondarySlot);
-                    teachers.push(faculty);
+        // Define paired slots for DSA, CAO, OS, MPMC core slots
+        const subjectPairedSlotInfo = {
+            DSA: {
+                primaryOptions: ["C1", "C2", "TCC1", "TCC2"],
+                pairings: { "C1": "TC1", "C2": "TC2" }
+            },
+            CAO: {
+                primaryOptions: ["D1", "D2", "TDD1", "TDD2"],
+                pairings: { "D1": "TD1", "D2": "TD2" }
+            },
+            OS: {
+                primaryOptions: ["E1", "E2"],
+                pairings: { "E1": "TE1", "E2": "TE2" }
+            },
+            MPMC: { // MPMC core slots are handled here, labs are separate in subjectLabConfig
+                primaryOptions: ["A1", "D1", "G1", "A2", "D2", "G2"],
+                pairings: {
+                    "A1": "TA1", "D1": "TD1", "G1": "TG1",
+                    "A2": "TA2", "D2": "TD2", "G2": "TG2"
                 }
             }
-        } else {
-            fullSlots.push(formData.get(`slots${i}_${j}`));
-            teachers.push(faculty);
+        };
+
+        // Generate all consecutive lab slot pairs from L1+L2 to L59+L60
+        const allLabPairs = [];
+        for (let i = 1; i <= 59; i += 2) {
+            allLabPairs.push(`L${i}+L${i+1}`);
         }
 
-        // --- Lab slot processing (inline for each slot choice) ---
-        if (subjectLabConfig[sub]) {
-            const labConfig = subjectLabConfig[sub];
-            for (let k = 0; k < labConfig.numDropdowns; k++) {
-                const selectedLabPair = formData.get(`labSlot${i}_${j}_${k}`); // Unique name for lab slot
-                if (selectedLabPair) {
-                    const [slot1, slot2] = selectedLabPair.split("+");
-                    fullSlots.push(slot1, slot2);
-                    // Lab teachers are specific to this choice group
-                    teachers.push(`${sub} Lab Teacher (${faculty})`, `${sub} Lab Teacher (${faculty})`);
+        // Define lab slot configurations for subjects that have them
+        const subjectLabConfig = {
+            JAVA: { numDropdowns: 2, options: allLabPairs },
+            MPMC: { numDropdowns: 1, options: allLabPairs }, // This MPMC lab can now clash with core slots
+            DSA:  { numDropdowns: 1, options: allLabPairs },
+            OS:   { numDropdowns: 1, options: allLabPairs }
+        };
+
+        // This map is for subjects that *don't* have special pairing/trio logic or labs, but have specific core slots
+        const subjectSpecificSlots = {
+            JAVA: ["TB1", "TB2"], // Regular core slots for Java, as single choices
+            FL: ["G1", "G2", "B1", "B2"],
+            STS: ["S11", "S15"], // Example specific slots for STS
+            French: ["F1", "F2"] // Example specific slots for French
+        };
+
+        // --- MAPPING ALL SLOTS TO THEIR END TIMES for Priority Logic and Clash Detection ---
+        const allPossibleSlotsWithEndTimes = {};
+        const times = ["8:00 AM", "8:55 AM", "9:50 AM", "10:45 AM", "11:40 AM", "12:35 PM", "2:00 PM", "2:55 PM", "3:50 PM"]; // 9 slots
+        const days = ["MON", "TUE", "WED", "THU", "FRI"]; // 5 days
+
+        // Define actual slot names from the matrix and their end times (in minutes from midnight)
+        // **IMPORTANT:** If any L-slot below directly corresponds to a regular slot (e.g., L27 IS D1),
+        // then the matrix should use the L-slot name here. This ensures proper clash detection.
+        // For now, I'm assuming L12, L18, L24 are fixed grid positions for some labs.
+        // If L27 is Thursday 8:00 AM, and it's the same cell as D1, then D1 needs to be replaced with L27.
+        // Based on the screenshot, MPMC Lab (L27+L28) is shown separately, while MPMC core is D1.
+        // This suggests L27/L28 *are not* D1/TD1, but separate lab blocks that need explicit mapping.
+        // To fix the clash, all slots (core and lab) must have unique day-time coordinates.
+        // I will map L27 and L28 to a specific time that *might* clash if picked.
+        // This is where you might need to adjust based on your actual lab schedule.
+        const slotsMatrix = [
+            ["A1", "F1", "D1", "TB1", "TG1", "S11", "A2", "F2", "D2"], // MON
+            ["B1", "G1", "E1", "TC1", "TAA1", "L12", "B2", "G2", "E2"], // TUE
+            ["C1", "A1", "F1", "TD1", "TBB1", "L18", "C2", "A2", "F2"], // WED
+            ["D1", "B1", "G1", "TE1", "TCC1", "L24", "D2", "B2", "G2"], // THU
+            ["E1", "C1", "TA1", "TF1", "TDD1", "S15", "E2", "C2", "TA2"]  // FRI
+        ];
+
+        // This map will store day, time, and end time for *every* known slot (core and lab)
+        const slotDayTimeInfo = {};
+
+        // Populate slotDayTimeInfo for matrix slots
+        for (let r = 0; r < days.length; r++) {
+            for (let c = 0; c < times.length; c++) {
+                const slot = slotsMatrix[r][c];
+                const startTimeStr = times[c];
+                const endTimeMinutes = convertTimeToMinutes(startTimeStr) + 55; // Each slot is 55 mins
+                slotDayTimeInfo[slot] = {
+                    day: days[r],
+                    startTime: startTimeStr,
+                    endTimeMinutes: endTimeMinutes,
+                    gridPosition: {row: r, col: c} // Useful for debugging/display
+                };
+            }
+        }
+
+        // Now, explicitly define timing for L-slots that are *not* in the matrix,
+        // but which can still clash. This is CRUCIAL for labs.
+        // This is an ASSUMPTION. You MUST verify these timings for your L-slots.
+        // For the clash L27 with TA1/D1, let's define L27 as a Thursday morning slot.
+        // Assuming L1+L2 is Monday 8:00 AM - 9:50 AM, L3+L4 is Monday 9:50 AM - 11:40 AM etc.
+        // The L-slots from L1 to L60 are generally 2-period blocks.
+        // A common mapping:
+        // L1-L10: Monday (L1-L2, L3-L4, L5-L6, L7-L8, L9-L10) starting at 8:00, 9:50, 11:40, 2:00, 3:50
+        // L11-L20: Tuesday
+        // L21-L30: Wednesday
+        // L31-L40: Thursday
+        // L41-L50: Friday
+        // L51-L60: Saturday (or extra)
+
+        // Let's create a more structured mapping for L-slots based on pairs:
+        const labSlotMapping = {}; // Maps "LXX" to {day, startTime}
+        const labStartTimes = ["8:00 AM", "9:50 AM", "11:40 AM", "2:00 PM", "3:50 PM"]; // 2-period blocks
+        let labIndex = 1;
+
+        days.forEach(day => {
+            labStartTimes.forEach(startTime => {
+                if (labIndex <= 60) {
+                    const slot1 = `L${labIndex}`;
+                    const slot2 = `L${labIndex + 1}`; // For the pair
+                    const startMin = convertTimeToMinutes(startTime);
+                    const endMin = startMin + (2 * 55); // Two periods of 55 min each
+
+                    slotDayTimeInfo[slot1] = {
+                        day: day,
+                        startTime: startTime,
+                        endTimeMinutes: startMin + 55 // End of first period
+                    };
+                    slotDayTimeInfo[slot2] = {
+                        day: day,
+                        startTime: getTimeStringFromMinutes(startMin + 55), // Start of second period
+                        endTimeMinutes: endMin // End of second period
+                    };
+                    labIndex += 2;
+                }
+            });
+        });
+
+        // Helper to convert minutes back to time string for display (optional)
+        function getTimeStringFromMinutes(totalMinutes) {
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12;
+            const displayMinutes = minutes < 10 ? '0' + minutes : minutes;
+            return `${displayHours}:${displayMinutes} ${ampm}`;
+        }
+
+        // Function to convert time string (e.g., "8:00 AM") to minutes from midnight
+        function convertTimeToMinutes(timeStr) {
+            const [time, ampm] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':').map(Number);
+            if (ampm === 'PM' && hours !== 12) {
+                hours += 12;
+            } else if (ampm === 'AM' && hours === 12) {
+                hours = 0; // Midnight 12 AM
+            }
+            return hours * 60 + minutes;
+        }
+
+        function generateInputs() {
+            const countInput = document.getElementById("subcount");
+            let count = parseInt(countInput.value);
+
+            if (isNaN(count) || count < 1) {
+                alert("Please enter a valid number of subjects (minimum 1).");
+                countInput.value = 1;
+                count = 1;
+            }
+
+            const container = document.getElementById("subjectInputs");
+            container.innerHTML = '';
+
+            for (let i = 0; i < count; i++) {
+                const div = document.createElement("div");
+                div.innerHTML = `
+                    <div class="subject-input-group">
+                        <label>Subject ${i + 1}:</label>
+                        <select name="subject${i}" id="subject${i}" required onchange="generateSlotChoices(${i});">
+                            <option value="">--Select--</option>
+                            ${subjectsList.map(s => `<option value="${s}">${s}</option>`).join('')}
+                        </select>
+                        <label>Number of Slot Choices:</label>
+                        <input type="number" name="slotCount${i}" id="slotCount${i}" min="1" max="50" value="1" onchange="generateSlotChoices(${i})">
+                    </div>
+                    <div id="slotChoices${i}"></div>
+                    <hr>
+                `;
+                container.appendChild(div);
+                generateSlotChoices(i);
+            }
+        }
+
+        function generateSlotChoices(index) {
+            const slotCountInput = document.getElementById(`slotCount${index}`);
+            let count = parseInt(slotCountInput.value);
+
+            if (isNaN(count) || count < 1) {
+                alert(`Please enter a valid number of slot choices for Subject ${index + 1} (minimum 1).`);
+                slotCountInput.value = 1;
+                count = 1;
+            }
+
+            const slotDiv = document.getElementById(`slotChoices${index}`);
+            slotDiv.innerHTML = '';
+
+            const selectedSubject = document.getElementById(`subject${index}`).value;
+            const facultyList = facultyMap[selectedSubject] || [];
+
+            for (let j = 0; j < count; j++) {
+                const slotChoiceLine = document.createElement("div");
+                slotChoiceLine.className = "slot-choice-line";
+
+                const facultySelect = document.createElement("select");
+                facultySelect.name = `faculty${index}_${j}`;
+                facultySelect.id = `faculty${index}_${j}`;
+                facultySelect.required = true;
+                facultySelect.innerHTML = '<option value="">--Select Faculty--</option>' + facultyList.map(f => `<option value="${f}">${f}</option>`).join('');
+                slotChoiceLine.appendChild(document.createTextNode('Faculty: '));
+                slotChoiceLine.appendChild(facultySelect);
+
+                // --- Core Slot Selection Logic ---
+                if (selectedSubject === "CVLA") {
+                    const primarySlotId = `slots${index}_${j}_0`;
+                    const secondarySlotId = `slots${index}_${j}_1`;
+                    const tertiarySlotId = `slots${index}_${j}_2`;
+
+                    const primarySelect = document.createElement("select");
+                    primarySelect.name = primarySlotId;
+                    primarySelect.id = primarySlotId;
+                    primarySelect.required = true;
+                    primarySelect.onchange = () => populateCVLATrio(index, j, primarySelect.value);
+                    primarySelect.innerHTML = '<option value="">--Select Primary--</option>' + cvlaInitialSlots.map(s => `<option value="${s}">${s}</option>`).join('');
+
+                    const secondarySelect = document.createElement("select");
+                    secondarySelect.name = secondarySlotId;
+                    secondarySelect.id = secondarySlotId;
+                    secondarySelect.required = true;
+                    secondarySelect.disabled = true;
+                    secondarySelect.innerHTML = '<option value="">--Secondary--</option>';
+
+                    const tertiarySelect = document.createElement("select");
+                    tertiarySelect.name = tertiarySlotId;
+                    tertiarySelect.id = tertiarySlotId;
+                    tertiarySelect.required = true;
+                    tertiarySelect.disabled = true;
+                    tertiarySelect.innerHTML = '<option value="">--Tertiary--</option>';
+
+                    slotChoiceLine.appendChild(document.createTextNode(` Trio Choice ${j + 1}: `));
+                    slotChoiceLine.appendChild(primarySelect);
+                    slotChoiceLine.appendChild(secondarySelect);
+                    slotChoiceLine.appendChild(tertiarySelect);
+
+                } else if (subjectPairedSlotInfo[selectedSubject]) {
+                    const { primaryOptions } = subjectPairedSlotInfo[selectedSubject];
+                    const primarySelectId = `slots${index}_${j}_primary`;
+                    const secondarySelectId = `slots${index}_${j}_secondary`;
+
+                    const primarySelect = document.createElement("select");
+                    primarySelect.name = primarySelectId;
+                    primarySelect.id = primarySelectId;
+                    primarySelect.required = true;
+                    primarySelect.onchange = () => populatePairedSlot(index, j, primarySelect.value, selectedSubject);
+                    primarySelect.innerHTML = '<option value="">--Select Primary--</option>' + primaryOptions.map(s => `<option value="${s}">${s}</option>`).join('');
+
+                    const secondarySelect = document.createElement("select");
+                    secondarySelect.name = secondarySelectId;
+                    secondarySelect.id = secondarySelectId;
+                    secondarySelect.required = true;
+                    secondarySelect.disabled = true;
+                    secondarySelect.innerHTML = '<option value="">--Paired Slot--</option>';
+
+                    slotChoiceLine.appendChild(document.createTextNode(` Slot Choice ${j + 1}: `));
+                    slotChoiceLine.appendChild(primarySelect);
+                    slotChoiceLine.appendChild(secondarySelect);
+
+                } else if (subjectSpecificSlots[selectedSubject]) {
+                    const slotsToDisplay = subjectSpecificSlots[selectedSubject];
+                    const slotSelect = document.createElement("select");
+                    slotSelect.name = `slots${index}_${j}_primary`;
+                    slotSelect.required = true;
+                    slotSelect.innerHTML = '<option value="">--Select Slot--</option>' + slotsToDisplay.map(s => `<option value="${s}">${s}</option>`).join('');
+
+                    slotChoiceLine.appendChild(document.createTextNode(` Slot Choice ${j + 1}: `));
+                    slotChoiceLine.appendChild(slotSelect);
+                }
+                else {
+                    // Default case for subjects without specific core slot logic: all general core slots
+                    // Filter out L-slots that are generally not single core slots, unless explicitly defined in matrix
+                    const selectableCoreSlots = Object.keys(slotDayTimeInfo).filter(s => !s.startsWith('L') || ['L12', 'L18', 'L24'].includes(s));
+                    const slotSelect = document.createElement("select");
+                    slotSelect.name = `slots${index}_${j}_primary`;
+                    slotSelect.required = true;
+                    slotSelect.innerHTML = '<option value="">--Select Slot--</option>' + selectableCoreSlots.map(s => `<option value="${s}">${s}</option>`).join('');
+
+                    slotChoiceLine.appendChild(document.createTextNode(` Slot Choice ${j + 1}: `));
+                    slotChoiceLine.appendChild(slotSelect);
+                }
+
+                // --- Lab Slot Selection Logic (independent of core slot logic) ---
+                if (subjectLabConfig[selectedSubject]) {
+                    const labConfig = subjectLabConfig[selectedSubject];
+                    const labSelectGroup = document.createElement("div");
+                    labSelectGroup.className = "lab-select-group";
+                    labSelectGroup.appendChild(document.createTextNode('Lab: '));
+
+                    for (let k = 0; k < labConfig.numDropdowns; k++) {
+                        const labDropdown = document.createElement("select");
+                        labDropdown.name = `labSlot${index}_${j}_${k}`;
+                        labDropdown.id = `labSlot${index}_${j}_${k}`;
+                        labDropdown.required = true;
+
+                        let optionsHtml = '<option value="">--Select Lab--</option>';
+                        labConfig.options.forEach(labPair => {
+                            optionsHtml += `<option value="${labPair}">${labPair}</option>`;
+                        });
+                        labDropdown.innerHTML = optionsHtml;
+                        labSelectGroup.appendChild(labDropdown);
+                    }
+                    slotChoiceLine.appendChild(labSelectGroup);
+                }
+                slotDiv.appendChild(slotChoiceLine);
+            }
+        }
+
+        function populateCVLATrio(subjectIndex, choiceIndex, selectedPrimarySlot) {
+            const secondSlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_1`);
+            const thirdSlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_2`);
+
+            secondSlotDropdown.innerHTML = '<option value="">--Secondary--</option>';
+            thirdSlotDropdown.innerHTML = '<option value="">--Tertiary--</option>';
+
+            secondSlotDropdown.disabled = true;
+            thirdSlotDropdown.disabled = true;
+
+            if (selectedPrimarySlot && cvlaSlotTrios[selectedPrimarySlot]) {
+                const [secondary, tertiary] = cvlaSlotTrios[selectedPrimarySlot];
+
+                if (secondary) {
+                    const secondaryOption = document.createElement('option');
+                    secondaryOption.value = secondary;
+                    secondaryOption.textContent = secondary;
+                    secondaryOption.selected = true;
+                    secondSlotDropdown.appendChild(secondaryOption);
+                    secondSlotDropdown.disabled = false;
+                }
+
+                if (tertiary) {
+                    const tertiaryOption = document.createElement('option');
+                    tertiaryOption.value = tertiary;
+                    tertiaryOption.textContent = tertiary;
+                    tertiaryOption.selected = true;
+                    thirdSlotDropdown.appendChild(tertiaryOption);
+                    thirdSlotDropdown.disabled = false;
                 }
             }
         }
-    }
-    subjects.push({ name: sub, slots: fullSlots, teachers });
-  }
 
-  const used = {};
-  const allTimetables = [];
+        function populatePairedSlot(subjectIndex, choiceIndex, selectedPrimarySlot, subjectName) {
+            const secondarySlotDropdown = document.getElementById(`slots${subjectIndex}_${choiceIndex}_secondary`);
+            const { pairings } = subjectPairedSlotInfo[subjectName];
 
-  function isClash(slots) {
-    return slots.some(s => used[s]);
-  }
-  function assign(slots, subject, teacher) {
-    slots.forEach((s, idx) => used[s] = `${subject} (${teacher[idx] || teacher[0]})`);
-  }
-  function unassign(slots) {
-    slots.forEach(s => delete used[s]);
-  }
-  function backtrack(idx) {
-    if (idx === subjects.length) return true;
-    const s = subjects[idx];
-    if (!isClash(s.slots)) {
-      assign(s.slots, s.name, s.teachers);
-      if (backtrack(idx + 1)) return true;
-      unassign(s.slots);
-    }
-    return false;
-  }
+            secondarySlotDropdown.innerHTML = '<option value="">--Paired Slot--</option>';
+            secondarySlotDropdown.disabled = true;
 
-  let countTT = 0;
-  for (let tries = 0; tries < 20 && countTT < 5; tries++) {
-    Object.keys(used).forEach(k => delete used[k]);
-    if (backtrack(0)) {
-      allTimetables.push(JSON.parse(JSON.stringify(used)));
-      countTT++;
-    }
-  }
+            if (selectedPrimarySlot && pairings[selectedPrimarySlot]) {
+                const secondary = pairings[selectedPrimarySlot];
+                if (secondary) {
+                    const secondaryOption = document.createElement('option');
+                    secondaryOption.value = secondary;
+                    secondaryOption.textContent = secondary;
+                    secondaryOption.selected = true;
+                    secondarySlotDropdown.appendChild(secondaryOption);
+                    secondarySlotDropdown.disabled = false;
+                }
+            }
+        }
 
-  const out = document.getElementById("output");
-  const visual = document.getElementById("visualOutput");
-  out.innerHTML = `<h2>Generated ${countTT} Timetables</h2>`;
-  visual.innerHTML = '';
+        // --- Core Timetable Generation Logic ---
+        function generateTimetables(event) {
+            event.preventDefault(); // Prevent default form submission and page reload
 
-  const times = ["8:00 AM", "8:55 AM", "9:50 AM", "10:45 AM", "11:40 AM", "12:35 PM", "2:00 PM", "2:55 PM", "3:50 PM"];
-  const days = ["MON","TUE","WED","THU","FRI"];
-  const slotsMatrix = [
-    ["A1","F1","D1","TB1","TG1","S11","A2","F2","D2"],
-    ["B1","G1","E1","TC1","TAA1","L12","B2","G2","E2"],
-    ["C1","A1","F1","TD1","TBB1","L18","C2","A2","F2"],
-    ["D1","B1","G1","TE1","TCC1","L24","D2","B2","G2"],
-    ["E1","C1","TA1","TF1","TDD1","S15","E2","C2","TA2"]
-  ];
+            const formData = new FormData(document.getElementById("ttform"));
+            const subjectsData = [];
+            const subCountInput = document.getElementById("subcount");
+            const count = parseInt(subCountInput.value);
 
-  allTimetables.forEach((tt, idx) => {
-    let grid = `<h3>Timetable ${idx + 1}</h3><div class='grid-timetable'>`;
-    grid += `<div class='grid-cell row-head'></div>` + times.map(t => `<div class='grid-cell header'>${t}</div>`).join('');
-    days.forEach((day, r) => {
-      grid += `<div class='grid-cell row-head'>${day}</div>`;
-      for (let c = 0; c < 9; c++) {
-        const slot = slotsMatrix[r][c];
-        grid += `<div class='grid-cell'>${tt[slot] || '-'}</div>`;
-      }
-    });
-    grid += `</div>`;
-    visual.innerHTML += grid;
-  });
-}
+            if (isNaN(count) || count < 1) {
+                alert("Please enter a valid number of subjects (minimum 1) before generating timetables.");
+                return;
+            }
 
-document.getElementById("ttform").addEventListener("submit", generateTimetables);
-</script>
+            document.getElementById("output").innerHTML = '';
+            document.getElementById("visualOutput").innerHTML = '';
+
+
+            for (let i = 0; i < count; i++) {
+                const sub = formData.get(`subject${i}`);
+                if (!sub) {
+                    alert(`Please select a subject for Subject ${i + 1}.`);
+                    return;
+                }
+
+                const slotCountInput = document.getElementById(`slotCount${i}`);
+                const slotCount = parseInt(slotCountInput.value);
+                if (isNaN(slotCount) || slotCount < 1) {
+                    alert(`Please enter a valid number of slot choices for Subject ${i + 1} (minimum 1).`);
+                    return;
+                }
+
+                const subjectSlotChoices = [];
+
+                for (let j = 0; j < slotCount; j++) {
+                    const faculty = formData.get(`faculty${i}_${j}`);
+                    if (!faculty) {
+                        alert(`Please select a faculty for Subject ${i + 1}, Choice ${j + 1}.`);
+                        return;
+                    }
+
+                    let coreSlots = [];
+                    let assignedLabSlots = []; // Keep track of labs separately for display purposes
+
+                    // Collect Core Slots
+                    if (sub === "CVLA") {
+                        const primarySlot = formData.get(`slots${i}_${j}_0`);
+                        const secondarySlot = formData.get(`slots${i}_${j}_1`);
+                        const tertiarySlot = formData.get(`slots${i}_${j}_2`);
+                        if (!primarySlot || !secondarySlot || !tertiarySlot) {
+                            alert(`Please select all three slots for CVLA, Subject ${i + 1}, Choice ${j + 1}.`);
+                            return;
+                        }
+                        coreSlots.push(primarySlot, secondarySlot, tertiarySlot);
+                    } else if (subjectPairedSlotInfo[sub]) {
+                        const primarySlot = formData.get(`slots${i}_${j}_primary`);
+                        const secondarySlot = formData.get(`slots${i}_${j}_secondary`);
+                        if (!primarySlot || (subjectPairedSlotInfo[sub].pairings[primarySlot] && !secondarySlot)) {
+                            alert(`Please select primary and paired slots for Subject ${i + 1}, Choice ${j + 1}.`);
+                            return;
+                        }
+                        coreSlots.push(primarySlot);
+                        if (secondarySlot && secondarySlot !== "--Paired Slot--") {
+                            coreSlots.push(secondarySlot);
+                        }
+                    } else { // This handles subjectSpecificSlots and general slots
+                        const singleCoreSlot = formData.get(`slots${i}_${j}_primary`);
+                        if (!singleCoreSlot) {
+                            alert(`Please select a slot for Subject ${i + 1}, Choice ${j + 1}.`);
+                            return;
+                        }
+                        coreSlots.push(singleCoreSlot);
+                    }
+
+                    // Collect Lab Slots (these are *also* treated as slots for clash detection)
+                    if (subjectLabConfig[sub]) {
+                        const labConfig = subjectLabConfig[sub];
+                        for (let k = 0; k < labConfig.numDropdowns; k++) {
+                            const selectedLabPair = formData.get(`labSlot${i}_${j}_${k}`);
+                            if (!selectedLabPair) {
+                                alert(`Please select a lab slot for Subject ${i + 1}, Choice ${j + 1}, Lab ${k + 1}.`);
+                                return;
+                            }
+                            const [slot1, slot2] = selectedLabPair.split("+");
+                            // Add lab slots to both coreSlots (for clash detection) and assignedLabSlots (for separate display)
+                            coreSlots.push(slot1, slot2); // Crucial for clash detection!
+                            assignedLabSlots.push({ slot: slot1, teacher: faculty });
+                            assignedLabSlots.push({ slot: slot2, teacher: faculty });
+                        }
+                    }
+
+                    if (coreSlots.length > 0 || assignedLabSlots.length > 0) {
+                        subjectSlotChoices.push({
+                            coreSlots: coreSlots, // This now includes both core lecture slots and labs that need clash checking
+                            labs: assignedLabSlots, // This is specifically for the "Other Lab Slots Assigned" list
+                            faculty: faculty
+                        });
+                    }
+                }
+                if (subjectSlotChoices.length > 0) {
+                    subjectsData.push({ name: sub, choices: subjectSlotChoices });
+                }
+            }
+
+            if (subjectsData.length === 0) {
+                alert("No valid subject and slot choices collected. Please fill in all required fields.");
+                return;
+            }
+
+
+            const allTimetables = [];
+            const uniqueTimetables = new Set();
+            const MAX_TIMETABLES = 500;
+
+            let currentTimetable = {};
+
+            // Function to check for clashes using the comprehensive slotDayTimeInfo
+            function isClash(slots) {
+                for (const slotName of slots) {
+                    const info = slotDayTimeInfo[slotName];
+                    if (!info) {
+                        console.warn(`Warning: Slot "${slotName}" has no defined day/time information.`);
+                        continue;
+                    }
+
+                    const { day, startTime, endTimeMinutes } = info;
+
+                    for (const assignedSlotName in currentTimetable) {
+                        const assignedInfo = slotDayTimeInfo[assignedSlotName];
+                        if (!assignedInfo) {
+                             console.warn(`Warning: Assigned slot "${assignedSlotName}" has no defined day/time information.`);
+                             continue;
+                        }
+                        const { day: assignedDay, startTime: assignedStartTime, endTimeMinutes: assignedEndTimeMinutes } = assignedInfo;
+
+                        // Check for clash only if on the same day
+                        if (day === assignedDay) {
+                            // Convert start/end times to minutes for comparison
+                            const newSlotStart = convertTimeToMinutes(startTime);
+                            const newSlotEnd = endTimeMinutes; // Already in minutes
+                            const assignedSlotStart = convertTimeToMinutes(assignedStartTime);
+                            const assignedSlotEnd = assignedEndTimeMinutes; // Already in minutes
+
+                            // Clash if intervals overlap
+                            // (StartA < EndB) && (EndA > StartB)
+                            if (newSlotStart < assignedSlotEnd && newSlotEnd > assignedSlotStart) {
+                                console.log(`Clash detected: ${slotName} (${day} ${startTime}-${getTimeStringFromMinutes(endTimeMinutes)}) ` +
+                                            `clashes with ${assignedSlotName} (${assignedDay} ${assignedStartTime}-${getTimeStringFromMinutes(assignedEndTimeMinutes)})`);
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+
+
+            function assignSlots(choice, subjectName) {
+                // Assign all slots (core and lab) that were collected into coreSlots for clash detection
+                choice.coreSlots.forEach(s => {
+                    // Use actual display name from the form, e.g., "MPMC Lab (RAVI TIWARI)"
+                    let displayContent = `${subjectName} (${choice.faculty})`;
+                    if (s.startsWith('L') && choice.labs.some(lab => lab.slot === s)) {
+                         displayContent = `${subjectName} Lab (${choice.faculty})`;
+                    }
+                    currentTimetable[s] = displayContent;
+                });
+            }
+
+            function unassignSlots(choice) {
+                choice.coreSlots.forEach(s => delete currentTimetable[s]);
+            }
+
+            function backtrack(subjectIndex) {
+                if (allTimetables.length >= MAX_TIMETABLES) {
+                    return;
+                }
+
+                if (subjectIndex === subjectsData.length) {
+                    const sortedTimetableKeys = Object.keys(currentTimetable).sort();
+                    const stringifiedTimetable = JSON.stringify(sortedTimetableKeys.map(key => ({ [key]: currentTimetable[key] })));
+
+                    if (!uniqueTimetables.has(stringifiedTimetable)) {
+                        allTimetables.push(JSON.parse(JSON.stringify(currentTimetable)));
+                        uniqueTimetables.add(stringifiedTimetable);
+                    }
+                    return;
+                }
+
+                const currentSubject = subjectsData[subjectIndex];
+
+                for (let i = 0; i < currentSubject.choices.length; i++) {
+                    const chosenSlotCombination = currentSubject.choices[i];
+                    // allSlotsForChoice now includes both core lecture slots and selected lab slots for this choice
+                    const allSlotsForChoice = [...chosenSlotCombination.coreSlots];
+
+                    if (!isClash(allSlotsForChoice)) {
+                        assignSlots(chosenSlotCombination, currentSubject.name);
+                        backtrack(subjectIndex + 1);
+                        unassignSlots(chosenSlotCombination);
+                    }
+                }
+            }
+
+            backtrack(0);
+
+            const priorityTimes = {
+                "P_12_30PM": convertTimeToMinutes("12:30 PM"),
+                "P_3_40PM": convertTimeToMinutes("3:40 PM"),
+                "P_4_30PM": convertTimeToMinutes("4:30 PM"),
+                "P_5_30PM": convertTimeToMinutes("5:30 PM")
+            };
+
+            const prioritizedTimetables = {
+                "P_12_30PM": [],
+                "P_3_40PM": [],
+                "P_4_30PM": [],
+                "P_5_30PM": [],
+                "Other": []
+            };
+
+            allTimetables.forEach(tt => {
+                let latestClassEnd = 0;
+
+                for (const slotName in tt) {
+                    const info = slotDayTimeInfo[slotName];
+                    if (info && info.endTimeMinutes !== undefined) {
+                        if (info.endTimeMinutes > latestClassEnd) {
+                            latestClassEnd = info.endTimeMinutes;
+                        }
+                    } else {
+                        console.warn(`Slot ${slotName} missing timing information for priority calculation.`);
+                        // Fallback: assume it ends late to be conservative for priority
+                        latestClassEnd = Math.max(latestClassEnd, convertTimeToMinutes("5:30 PM"));
+                    }
+                }
+
+                if (latestClassEnd <= priorityTimes["P_12_30PM"]) {
+                    prioritizedTimetables["P_12_30PM"].push(tt);
+                } else if (latestClassEnd <= priorityTimes["P_3_40PM"]) {
+                    prioritizedTimetables["P_3_40PM"].push(tt);
+                } else if (latestClassEnd <= priorityTimes["P_4_30PM"]) {
+                    prioritizedTimetables["P_4_30PM"].push(tt);
+                } else if (latestClassEnd <= priorityTimes["P_5_30PM"]) {
+                    prioritizedTimetables["P_5_30PM"].push(tt);
+                } else {
+                    prioritizedTimetables["Other"].push(tt);
+                }
+            });
+
+            const finalPrioritiesOrder = ["P_12_30PM", "P_3_40PM", "P_4_30PM", "P_5_30PM", "Other"];
+            let timetablesToDisplay = [];
+            let outputMessageHeading = '';
+
+            for (const p of finalPrioritiesOrder) {
+                if (prioritizedTimetables[p].length > 0) {
+                    outputMessageHeading = `<h3>Timetables Meeting Priority: ${p.replace('P_12_30PM', 'No classes after 12:30 PM (Highest Priority)').replace('P_3_40PM', 'No classes after 3:40 PM').replace('P_4_30PM', 'No classes after 4:30 PM').replace('P_5_30PM', 'No classes after 5:30 PM (Lowest Priority Group)').replace('Other', 'Other Timetables (No specific priority met)')} (${prioritizedTimetables[p].length} found)</h3>`;
+                    timetablesToDisplay = prioritizedTimetables[p];
+                    break;
+                }
+            }
+
+            const out = document.getElementById("output");
+            const visual = document.getElementById("visualOutput");
+
+            if (allTimetables.length === 0) {
+                out.innerHTML = `<h2>No Timetables Could Be Generated</h2><p>Please review your subject choices, faculty assignments, and slot combinations. Ensure there are enough valid, non-clashing options for all subjects. Check console for clash details.</p>`;
+                return;
+            }
+
+            out.innerHTML = `<h2>Generated ${allTimetables.length} Timetables in total.</h2>`;
+            out.innerHTML += outputMessageHeading || `<h3>No specific priority criteria met. Displaying all ${allTimetables.length} valid timetables found.</h3>`;
+
+            if (timetablesToDisplay.length === 0) {
+                 timetablesToDisplay = allTimetables;
+            }
+
+
+            const slotsMatrixDisplay = [ // This is for display only. Use slotDayTimeInfo for logic.
+                ["A1", "F1", "D1", "TB1", "TG1", "S11", "A2", "F2", "D2"], // MON
+                ["B1", "G1", "E1", "TC1", "TAA1", "L12", "B2", "G2", "E2"], // TUE
+                ["C1", "A1", "F1", "TD1", "TBB1", "L18", "C2", "A2", "F2"], // WED
+                ["D1", "B1", "G1", "TE1", "TCC1", "L24", "D2", "B2", "G2"], // THU
+                ["E1", "C1", "TA1", "TF1", "TDD1", "S15", "E2", "C2", "TA2"]  // FRI
+            ];
+
+
+            timetablesToDisplay.forEach((tt, idx) => {
+                let gridHtml = `<div><h4>Timetable ${idx + 1}</h4><div class='grid-timetable'>`;
+                gridHtml += `<div class='grid-cell row-head'></div>` + times.map(t => `<div class='grid-cell header'>${t}</div>`).join('');
+                days.forEach((day, r) => {
+                    gridHtml += `<div class='grid-cell row-head'>${day}</div>`;
+                    for (let c = 0; c < 9; c++) {
+                        const slot = slotsMatrixDisplay[r][c];
+                        gridHtml += `<div class='grid-cell'>${tt[slot] || '-'}</div>`;
+                    }
+                });
+                gridHtml += `</div>`;
+
+                gridHtml += `<ul class='lab-list'><b>Other Lab Slots Assigned (these are properly checked for clashes):</b>`;
+                const assignedLabs = Object.keys(tt).filter(slot =>
+                    slot.startsWith('L') &&
+                    (!slotDayTimeInfo[slot] || !slotDayTimeInfo[slot].gridPosition) // Only list if not shown in main grid
+                ).sort((a, b) => {
+                    const numA = parseInt(a.substring(1));
+                    const numB = parseInt(b.substring(1));
+                    return numA - numB;
+                });
+
+                if (assignedLabs.length > 0) {
+                    assignedLabs.forEach(slot => {
+                        gridHtml += `<li>${slot}: ${tt[slot]} (Day: ${slotDayTimeInfo[slot]?.day || 'N/A'}, Time: ${slotDayTimeInfo[slot]?.startTime || 'N/A'})</li>`;
+                    });
+                } else {
+                    gridHtml += `<li>No additional lab slots assigned for this timetable.</li>`;
+                }
+                gridHtml += `</ul></div>`;
+                visual.innerHTML += gridHtml;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', generateInputs);
+        document.getElementById("ttform").addEventListener("submit", generateTimetables);
+    </script>
 
 </body>
 </html>
